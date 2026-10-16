@@ -1,0 +1,4569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Kingdom Defenders: Royal Rush</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-title: 'Cinzel', serif;
+      --font-body: 'Nunito', sans-serif;
+    }
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at center, #1a2418 0%, #0b0f0a 100%);
+      font-family: var(--font-body);
+      color: #fef3c7;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .font-fantasy {
+      font-family: var(--font-title);
+    }
+    /* Custom Medieval Wood & Gold UI Frames */
+    .kr-panel {
+      background: linear-gradient(180deg, #3f2817 0%, #27170c 100%);
+      border: 3px solid #b4833e;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.75), inset 0 2px 2px rgba(255,225,150,0.35), inset 0 -3px 6px rgba(0,0,0,0.8);
+      border-radius: 14px;
+    }
+    .kr-btn {
+      background: linear-gradient(180deg, #f59e0b 0%, #b45309 100%);
+      border: 2px solid #fde68a;
+      box-shadow: 0 4px 0 #78350f, 0 6px 12px rgba(0,0,0,0.6);
+      color: #fffbeb;
+      text-shadow: 0 2px 2px rgba(0,0,0,0.8);
+      transition: transform 0.1s ease, filter 0.15s ease, box-shadow 0.1s ease;
+      cursor: pointer;
+    }
+    .kr-btn:hover:not(:disabled) {
+      filter: brightness(1.12);
+      transform: translateY(-1px);
+    }
+    .kr-btn:active:not(:disabled) {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #78350f, 0 2px 6px rgba(0,0,0,0.6);
+    }
+    .kr-btn:disabled {
+      filter: grayscale(0.85) brightness(0.7);
+      cursor: not-allowed;
+    }
+    .kr-btn-stone {
+      background: linear-gradient(180deg, #57534e 0%, #292524 100%);
+      border: 2px solid #a8a29e;
+      box-shadow: 0 4px 0 #1c1917, 0 6px 12px rgba(0,0,0,0.6);
+      color: #f5f5f4;
+      text-shadow: 0 2px 2px rgba(0,0,0,0.8);
+      transition: all 0.1s ease;
+      cursor: pointer;
+    }
+    .kr-btn-stone:hover {
+      filter: brightness(1.15);
+    }
+    .kr-btn-stone:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #1c1917;
+    }
+
+    /* Radial Menu Ring & Nodes */
+    #radial-menu {
+      pointer-events: none;
+      transition: opacity 0.16s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    #radial-menu.active {
+      pointer-events: auto;
+    }
+    .radial-ring {
+      border: 4px dashed rgba(251, 191, 36, 0.75);
+      box-shadow: 0 0 24px rgba(0,0,0,0.85), inset 0 0 24px rgba(0,0,0,0.65);
+      background: radial-gradient(circle, rgba(28,25,23,0.45) 0%, rgba(28,25,23,0.82) 100%);
+      animation: spinSlow 24s linear infinite;
+    }
+    @keyframes spinSlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .radial-node {
+      pointer-events: auto;
+      transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.15s ease;
+      box-shadow: 0 5px 14px rgba(0,0,0,0.85), inset 0 2px 3px rgba(255,255,255,0.4);
+    }
+    .radial-node:hover {
+      transform: scale(1.14);
+      z-index: 30;
+    }
+    .radial-node:active {
+      transform: scale(0.95);
+    }
+
+    /* Early Wave Skull Pulse */
+    @keyframes skullPulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -50%) scale(1.12); }
+    }
+    .skull-marker {
+      animation: skullPulse 1.3s ease-in-out infinite;
+      cursor: pointer;
+    }
+    .skull-marker:hover {
+      filter: brightness(1.2) drop-shadow(0 0 10px #ef4444);
+    }
+
+    /* Scrollbar for Encyclopedia */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #1c1917;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #b4833e;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Responsive Aspect-Ratio Game Stage (16:9 logical 1280x720) -->
+  <div id="game-wrapper" class="relative w-full h-full flex items-center justify-center p-1 sm:p-2 overflow-hidden">
+    <div id="stage-container" class="relative w-full max-w-[1360px] aspect-[16/9] max-h-full shadow-2xl rounded-2xl overflow-hidden border-4 border-[#785124] bg-[#1b2e16]">
+      
+      <!-- Main HTML5 Game Canvas -->
+      <canvas id="game-canvas" width="1280" height="720" class="w-full h-full block cursor-pointer"></canvas>
+
+      <!-- ================= TOP HUD BAR ================= -->
+      <div class="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none z-20 gap-2">
+        <!-- Left Stats: Lives, Gold, Wave -->
+        <div class="kr-panel px-3 py-1.5 flex items-center gap-3 sm:gap-5 pointer-events-auto">
+          <!-- Lives -->
+          <div class="flex items-center gap-1.5" title="Kingdom Lives Remaining">
+            <span class="text-red-500 text-lg sm:text-xl drop-shadow">❤️</span>
+            <span id="hud-lives" class="font-black text-base sm:text-xl text-amber-100 tracking-wide">20</span>
+          </div>
+          <div class="h-5 w-[2px] bg-amber-900/80"></div>
+          <!-- Gold -->
+          <div class="flex items-center gap-1.5" title="Royal Treasury Gold">
+            <span class="text-yellow-400 text-lg sm:text-xl drop-shadow">🪙</span>
+            <span id="hud-gold" class="font-black text-base sm:text-xl text-yellow-300 tracking-wide">260</span>
+          </div>
+          <div class="h-5 w-[2px] bg-amber-900/80"></div>
+          <!-- Wave Counter -->
+          <div class="flex items-center gap-1.5" title="Current Wave">
+            <span class="text-amber-400 text-base sm:text-lg">⚔️</span>
+            <span class="text-xs sm:text-sm uppercase font-bold text-amber-300/90">Wave</span>
+            <span id="hud-wave" class="font-black text-base sm:text-xl text-white">0 / 12</span>
+          </div>
+        </div>
+
+        <!-- Center Status Banner / Active Targeting Prompt -->
+        <div id="targeting-banner" class="hidden kr-panel px-4 py-1.5 bg-amber-950/95 border-amber-400 text-amber-200 font-bold text-xs sm:text-sm flex items-center gap-3 pointer-events-auto animate-bounce">
+          <span id="targeting-text">Click on the battlefield to cast Rain of Fire!</span>
+          <button id="cancel-target-btn" class="px-2 py-0.5 rounded bg-red-800 hover:bg-red-700 text-white text-xs font-extrabold border border-red-400">Cancel (Esc)</button>
+        </div>
+
+        <!-- Right Controls: Call Wave, Levels, Tech Tree, Speed, Pause, Encyclopedia, Audio -->
+        <div class="flex items-center gap-1.5 sm:gap-2 pointer-events-auto">
+          <button id="btn-call-wave" class="kr-btn px-3 py-1.5 rounded-xl font-extrabold text-xs sm:text-sm flex items-center gap-1.5">
+            <span>💀</span>
+            <span id="btn-call-wave-text">Start Wave 1</span>
+          </button>
+          <button id="btn-levels" class="kr-btn-stone px-2.5 py-1.5 rounded-xl font-black text-xs sm:text-sm flex items-center gap-1" title="Select Campaign Stage">
+            <span>🗺️</span><span id="hud-stage-label" class="hidden md:inline">Stage 1</span>
+          </button>
+          <button id="btn-tech" class="kr-btn-stone px-2.5 py-1.5 rounded-xl font-black text-xs sm:text-sm flex items-center gap-1" title="Royal Tech Tree & Star Upgrades">
+            <span>🌟</span><span id="hud-stars-count" class="text-yellow-300">3</span>
+          </button>
+          <button id="btn-speed" class="kr-btn-stone px-2.5 py-1.5 rounded-xl font-black text-xs sm:text-sm min-w-[44px]" title="Toggle Game Speed (1x / 2x)">1x</button>
+          <button id="btn-pause" class="kr-btn-stone px-2.5 py-1.5 rounded-xl font-black text-xs sm:text-sm" title="Pause Game (P)">⏸️</button>
+          <button id="btn-guide" class="kr-btn-stone px-2.5 py-1.5 rounded-xl font-black text-xs sm:text-sm" title="Encyclopedia & Tower Guide">📖</button>
+          <button id="btn-mute" class="kr-btn-stone px-2.5 py-1.5 rounded-xl font-black text-xs sm:text-sm" title="Toggle Sound Effects">🔊</button>
+        </div>
+      </div>
+
+      <!-- ================= EARLY WAVE SKULL MARKER OVERLAY ================= -->
+      <div id="skull-call-container" class="absolute z-20 pointer-events-auto" style="left: 7%; top: 39%;">
+        <div id="skull-marker-btn" class="skull-marker relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-b from-red-700 to-red-950 border-2 border-amber-300 shadow-xl flex items-center justify-center group">
+          <!-- SVG Circular Timer Ring -->
+          <svg class="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 48 48">
+            <circle cx="24" cy="24" r="21" fill="none" stroke="rgba(0,0,0,0.5)" stroke-width="4"></circle>
+            <circle id="skull-timer-ring" cx="24" cy="24" r="21" fill="none" stroke="#fbbf24" stroke-width="4" stroke-dasharray="132" stroke-dashoffset="0"></circle>
+          </svg>
+          <span class="text-xl sm:text-2xl drop-shadow">💀</span>
+          <!-- Hover Wave Preview Tooltip -->
+          <div id="skull-tooltip" class="hidden group-hover:block absolute left-16 top-1/2 -translate-y-1/2 w-56 kr-panel p-2.5 text-left pointer-events-none z-30">
+            <div id="skull-tooltip-title" class="text-xs font-black text-amber-300 uppercase tracking-wider border-b border-amber-800 pb-1 mb-1">Incoming Wave 1</div>
+            <div id="skull-tooltip-enemies" class="text-xs text-amber-100 space-y-0.5"></div>
+            <div id="skull-tooltip-bonus" class="mt-1.5 text-[11px] font-extrabold text-emerald-400">Click early for Bonus Gold & Spell CD!</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Northern Path Early Wave Skull Marker -->
+      <div id="skull-north-container" class="hidden absolute z-20 pointer-events-auto" style="left: 43%; top: 8%;">
+        <div id="skull-north-btn" class="skull-marker relative w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-b from-red-700 to-red-950 border-2 border-amber-300 shadow-xl flex items-center justify-center group" title="Northern Mountain Entrance - Click to Call Wave Early!">
+          <svg class="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 48 48">
+            <circle cx="24" cy="24" r="21" fill="none" stroke="rgba(0,0,0,0.5)" stroke-width="4"></circle>
+            <circle id="skull-north-ring" cx="24" cy="24" r="21" fill="none" stroke="#fbbf24" stroke-width="4" stroke-dasharray="132" stroke-dashoffset="0"></circle>
+          </svg>
+          <span class="text-lg sm:text-xl drop-shadow">💀</span>
+          <div class="hidden group-hover:block absolute top-14 left-1/2 -translate-x-1/2 w-48 kr-panel p-2 text-center pointer-events-none z-30">
+            <div class="text-[11px] font-black text-amber-300 uppercase">Northern Flank Active!</div>
+            <div class="text-[10px] text-emerald-400 font-bold mt-0.5">Click to Call Wave Early</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= RADIAL BUILD / UPGRADE MENU OVERLAY ================= -->
+      <div id="radial-menu" class="fixed-0 absolute z-30 opacity-0 scale-75" style="left: 50%; top: 50%; width: 196px; height: 196px; margin-left: -98px; margin-top: -98px;">
+        <div class="radial-ring absolute inset-2 rounded-full"></div>
+        <div id="radial-nodes-container" class="relative w-full h-full"></div>
+        <!-- Floating Tooltip Inside Radial Menu -->
+        <div id="radial-tooltip" class="hidden absolute left-1/2 -translate-x-1/2 -top-24 w-64 kr-panel p-2.5 text-center pointer-events-none z-40">
+          <div id="radial-tt-title" class="font-extrabold text-amber-300 text-xs sm:text-sm"></div>
+          <div id="radial-tt-desc" class="text-[11px] text-amber-100/90 leading-tight mt-0.5"></div>
+          <div id="radial-tt-stats" class="text-[11px] font-bold text-emerald-300 mt-1"></div>
+        </div>
+      </div>
+
+      <!-- ================= BOTTOM HUD BAR (SPELLS, HERO, INSPECTOR) ================= -->
+      <div class="absolute bottom-2 left-2 right-2 flex items-end justify-between pointer-events-none z-20 gap-2">
+        
+        <!-- Left Group: Global Spells + Hero Portrait -->
+        <div class="flex items-end gap-2 pointer-events-auto">
+          
+          <!-- Spell 1: Rain of Fire (Q) -->
+          <div class="kr-panel p-1.5 flex items-center gap-2">
+            <button id="spell-fire-btn" class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-b from-orange-600 to-red-900 border-2 border-amber-300 shadow-lg flex flex-col items-center justify-center overflow-hidden group hover:brightness-110 active:scale-95 transition">
+              <span class="text-xl sm:text-2xl drop-shadow">☄️</span>
+              <span class="text-[10px] font-black text-amber-200 leading-none mt-0.5">FIRE [Q]</span>
+              <!-- Cooldown Overlay -->
+              <div id="spell-fire-cd" class="hidden absolute inset-0 bg-black/75 flex items-center justify-center font-black text-sm text-amber-300">25s</div>
+            </button>
+
+            <!-- Spell 2: Call Reinforcements (W) -->
+            <button id="spell-reinf-btn" class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-b from-sky-600 to-blue-950 border-2 border-amber-300 shadow-lg flex flex-col items-center justify-center overflow-hidden group hover:brightness-110 active:scale-95 transition">
+              <span class="text-xl sm:text-2xl drop-shadow">🛡️</span>
+              <span class="text-[10px] font-black text-amber-200 leading-none mt-0.5">CALL [W]</span>
+              <!-- Cooldown Overlay -->
+              <div id="spell-reinf-cd" class="hidden absolute inset-0 bg-black/75 flex items-center justify-center font-black text-sm text-amber-300">14s</div>
+            </button>
+          </div>
+
+          <!-- Hero Command Card: Sir Gerald Lightseeker (Space / 1) -->
+          <div id="hero-card" class="kr-panel p-1.5 flex items-center gap-2.5 cursor-pointer hover:brightness-110 transition" title="Click or press [Space] to command Sir Gerald">
+            <div class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-b from-indigo-700 to-slate-900 border-2 border-yellow-400 flex items-center justify-center shadow-inner">
+              <span class="text-2xl sm:text-3xl">👑</span>
+              <!-- Level Badge -->
+              <span id="hero-lvl-badge" class="absolute -top-1.5 -left-1.5 bg-amber-500 text-slate-950 font-black text-[11px] px-1.5 py-0.2 rounded-full border border-white shadow">Lv1</span>
+              <span class="absolute -bottom-1 right-0.5 bg-slate-900/90 text-amber-200 text-[9px] font-bold px-1 rounded">SPACE</span>
+              <!-- Dead Respawn Overlay -->
+              <div id="hero-dead-overlay" class="hidden absolute inset-0 bg-red-950/85 rounded-xl flex items-center justify-center font-black text-xs text-red-200">12s</div>
+            </div>
+            <div class="hidden sm:flex flex-col w-28 pr-1">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-black text-amber-300 truncate">Sir Gerald</span>
+                <span id="hero-state-label" class="text-[10px] font-bold text-emerald-400">Ready</span>
+              </div>
+              <!-- HP Bar -->
+              <div class="w-full h-2.5 bg-stone-900 rounded-full overflow-hidden border border-stone-600 mt-1">
+                <div id="hero-hp-bar" class="h-full bg-gradient-to-r from-emerald-500 to-green-400 transition-all duration-150" style="width: 100%;"></div>
+              </div>
+              <!-- XP Bar -->
+              <div class="w-full h-1.5 bg-stone-900 rounded-full overflow-hidden border border-stone-700 mt-1">
+                <div id="hero-xp-bar" class="h-full bg-gradient-to-r from-sky-400 to-indigo-400 transition-all duration-150" style="width: 0%;"></div>
+              </div>
+              <div class="text-[10px] text-amber-200/80 mt-0.5 flex justify-between">
+                <span id="hero-hp-text">320/320</span>
+                <span>🛡️ Med</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right/Center Inspector Bar (Shows Selected Tower, Enemy, or Hero Details) -->
+        <div id="inspector-panel" class="kr-panel px-3 py-1.5 flex items-center gap-3 pointer-events-auto max-w-md sm:max-w-xl">
+          <div id="insp-icon" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-stone-800 border-2 border-amber-500/80 flex items-center justify-center text-xl sm:text-2xl shrink-0">🏰</div>
+          <div class="flex flex-col min-w-[160px] sm:min-w-[230px]">
+            <div class="flex items-center justify-between gap-2">
+              <span id="insp-title" class="font-extrabold text-amber-300 text-xs sm:text-sm truncate">Royal Battlefield</span>
+              <span id="insp-subtitle" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-900/70 text-amber-200">Click Pad to Build</span>
+            </div>
+            <div id="insp-desc" class="text-[11px] text-amber-100/85 line-clamp-1 mt-0.5">Select any Strategic Tower Pad, Soldier, Hero, or Enemy to inspect tactical stats.</div>
+            <div id="insp-stats" class="flex items-center gap-3 text-[11px] font-extrabold text-emerald-300 mt-0.5">
+              <span>🏹 Build Towers</span>
+              <span>🛡️ Block Foes</span>
+              <span>☄️ Cast Spells</span>
+            </div>
+          </div>
+          <!-- Quick Action Buttons inside Inspector (e.g. Rally Point / Deselect) -->
+          <div id="insp-actions" class="hidden items-center gap-1.5"></div>
+        </div>
+
+      </div>
+
+      <!-- ================= ENCYCLOPEDIA & TACTICAL GUIDE MODAL ================= -->
+      <div id="guide-modal" class="hidden absolute inset-0 bg-black/80 backdrop-blur-sm z-40 flex items-center justify-center p-4">
+        <div class="kr-panel w-full max-w-4xl max-h-[88%] flex flex-col overflow-hidden">
+          <div class="flex items-center justify-between px-5 py-3 border-b-2 border-amber-800 bg-stone-900/60">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">📖</span>
+              <h2 class="font-fantasy text-lg sm:text-2xl font-black text-amber-300 tracking-wide">Royal Encyclopedia & Tactical Guide</h2>
+            </div>
+            <button id="close-guide-btn" class="kr-btn px-3 py-1 rounded-lg font-black text-sm">✕ Close</button>
+          </div>
+
+          <div class="p-4 sm:p-5 overflow-y-auto space-y-5 text-xs sm:text-sm">
+            <!-- Towers Section -->
+            <div>
+              <h3 class="font-fantasy text-base sm:text-lg text-amber-400 font-bold mb-2 border-b border-amber-800/60 pb-1">🏰 Kingdom Towers & Tier 4 Specializations</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div class="bg-stone-900/70 p-3 rounded-xl border border-amber-700/50">
+                  <div class="font-extrabold text-amber-300 text-sm">🏹 Archer Tower (Cost: 70g)</div>
+                  <p class="text-amber-100/80 text-xs mt-1">Rapid physical attacks against both <b>Ground & Flying</b> enemies. Weak against high Physical Armor.</p>
+                  <div class="mt-2 text-[11px] text-emerald-300 space-y-1">
+                    <div>• <b>Rangers Hideout (T4-A):</b> Blinding attack speed + Poison Arrows (True damage over time).</div>
+                    <div>• <b>Musketeer Garrison (T4-B):</b> Extreme range sniper rifles + periodic Headshot Snipe.</div>
+                  </div>
+                </div>
+                <div class="bg-stone-900/70 p-3 rounded-xl border border-amber-700/50">
+                  <div class="font-extrabold text-amber-300 text-sm">🛡️ Militia Barracks (Cost: 75g)</div>
+                  <p class="text-amber-100/80 text-xs mt-1">Trains <b>3 Melee Soldiers</b> stationed at a customizable <b>Rally Point</b> to physically block and stall ground foes.</p>
+                  <div class="mt-2 text-[11px] text-emerald-300 space-y-1">
+                    <div>• <b>Holy Paladins (T4-A):</b> Heavy armor tanks with Holy Light self-healing & Shield Strike.</div>
+                    <div>• <b>Barbarian Hall (T4-B):</b> High-damage berserkers who also hurl axes at flying enemies!</div>
+                  </div>
+                </div>
+                <div class="bg-stone-900/70 p-3 rounded-xl border border-amber-700/50">
+                  <div class="font-extrabold text-amber-300 text-sm">🔮 Mage Guild (Cost: 100g)</div>
+                  <p class="text-amber-100/80 text-xs mt-1">Fires arcane bolts that <b>ignore Physical Armor</b>. Hits Ground & Flying enemies. Weak vs Magic Resistance.</p>
+                  <div class="mt-2 text-[11px] text-emerald-300 space-y-1">
+                    <div>• <b>Arcane Wizard (T4-A):</b> High-damage laser rays + periodic Disintegration Beam!</div>
+                    <div>• <b>Sorcerer Mage (T4-B):</b> Curses enemies (halving their armor for 5s) + triple bolt barrage.</div>
+                  </div>
+                </div>
+                <div class="bg-stone-900/70 p-3 rounded-xl border border-amber-700/50">
+                  <div class="font-extrabold text-amber-300 text-sm">💣 Dwarven Bombard (Cost: 125g)</div>
+                  <p class="text-amber-100/80 text-xs mt-1">Explosive Area-of-Effect physical damage. Crushes swarms of ground foes stopped by Barracks.</p>
+                  <div class="mt-2 text-[11px] text-emerald-300 space-y-1">
+                    <div>• <b>Big Bertha (T4-A):</b> Massive splash radius + periodic Dragonbreath Cluster Missile.</div>
+                    <div>• <b>Tesla x104 (T4-B):</b> Chain lightning arcs hitting up to 5 Ground & Flying foes!</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Enemies Section -->
+            <div>
+              <h3 class="font-fantasy text-base sm:text-lg text-red-400 font-bold mb-2 border-b border-amber-800/60 pb-1">👹 Enemy Forces & Armor Guide</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 text-xs">
+                <div class="bg-stone-900/70 p-2.5 rounded-xl border border-stone-700">
+                  <div class="font-extrabold text-lime-400">👺 Goblin Scout</div>
+                  <div class="text-amber-100/80 mt-0.5">Fast, low health swarming infantry. Armor: None.</div>
+                </div>
+                <div class="bg-stone-900/70 p-2.5 rounded-xl border border-stone-700">
+                  <div class="font-extrabold text-emerald-400">👹 Orc Warrior</div>
+                  <div class="text-amber-100/80 mt-0.5">Tough frontline cleaver brute. Physical Armor: Medium (30%).</div>
+                </div>
+                <div class="bg-stone-900/70 p-2.5 rounded-xl border border-stone-700">
+                  <div class="font-extrabold text-amber-400">🐺 Worg Rider</div>
+                  <div class="text-amber-100/80 mt-0.5">Very fast beast cavalry. Magic Resistance: Low (25%).</div>
+                </div>
+                <div class="bg-stone-900/70 p-2.5 rounded-xl border border-stone-700">
+                  <div class="font-extrabold text-teal-400">🧌 Forest Troll</div>
+                  <div class="text-amber-100/80 mt-0.5">Massive brute that rapidly <b>regenerates HP</b> every second! Focus fire to bring down.</div>
+                </div>
+                <div class="bg-stone-900/70 p-2.5 rounded-xl border border-stone-700">
+                  <div class="font-extrabold text-slate-300">🖤 Dark Knight</div>
+                  <div class="text-amber-100/80 mt-0.5">Full plate armor! <b>Physical Armor: High (75%)</b>. Use Mages!</div>
+                </div>
+                <div class="bg-stone-900/70 p-2.5 rounded-xl border border-stone-700">
+                  <div class="font-extrabold text-purple-400">🧙‍♂️ Dark Shaman</div>
+                  <div class="text-amber-100/80 mt-0.5">Heals nearby allies! <b>Magic Resist: High (75%)</b>. Use Archers!</div>
+                </div>
+                <div class="bg-stone-900/70 p-2.5 rounded-xl border border-stone-700">
+                  <div class="font-extrabold text-rose-400">🦇 Blood Gargoyle (Flying)</div>
+                  <div class="text-amber-100/80 mt-0.5">Flies over roads. Cannot be blocked by soldiers or hit by standard shells.</div>
+                </div>
+                <div class="bg-stone-900/70 p-2.5 rounded-xl border border-stone-700 md:col-span-2">
+                  <div class="font-extrabold text-yellow-400">👑 Moloch the Juggernaut (Boss)</div>
+                  <div class="text-amber-100/80 mt-0.5">Colossal demonic warlord with heavy armor, magic resistance, and crushing melee strikes.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= VICTORY / DEFEAT MODAL ================= -->
+      <div id="gameover-modal" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="kr-panel w-full max-w-md p-6 text-center flex flex-col items-center">
+          <div id="go-badge" class="text-5xl mb-2">🏆</div>
+          <h2 id="go-title" class="font-fantasy text-2xl sm:text-3xl font-black text-amber-300 tracking-wider">VICTORY!</h2>
+          <p id="go-subtitle" class="text-sm text-amber-100/90 mt-1">The Kingdom of Linirea stands triumphant!</p>
+          
+          <!-- Star Rating Display -->
+          <div id="go-stars" class="flex items-center justify-center gap-3 my-4 text-4xl">
+            <span>⭐</span><span>⭐</span><span>⭐</span>
+          </div>
+
+          <div class="w-full bg-stone-900/80 rounded-xl p-3 border border-amber-800/70 mb-5 grid grid-cols-3 gap-2 text-xs">
+            <div>
+              <div class="text-amber-400/80 font-bold">LIVES LEFT</div>
+              <div id="go-lives" class="text-lg font-black text-white">20 / 20</div>
+            </div>
+            <div>
+              <div class="text-amber-400/80 font-bold">FOES SLAIN</div>
+              <div id="go-kills" class="text-lg font-black text-emerald-400">142</div>
+            </div>
+            <div>
+              <div class="text-amber-400/80 font-bold">HERO LEVEL</div>
+              <div id="go-hero-lvl" class="text-lg font-black text-yellow-300">Lv 6</div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 w-full">
+            <button id="go-restart-btn" class="kr-btn flex-1 py-2.5 rounded-xl font-black text-sm sm:text-base">🔄 Play Again</button>
+            <button id="go-next-stage-btn" class="hidden kr-btn flex-1 py-2.5 rounded-xl font-black text-sm sm:text-base">🗺️ Next Stage</button>
+            <button id="go-endless-btn" class="hidden kr-btn-stone flex-1 py-2.5 rounded-xl font-black text-sm sm:text-base">♾️ Endless</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= CAMPAIGN STAGE SELECT MODAL ================= -->
+      <div id="levels-modal" class="hidden absolute inset-0 bg-black/85 backdrop-blur-sm z-40 flex items-center justify-center p-4">
+        <div class="kr-panel w-full max-w-4xl max-h-[88%] flex flex-col overflow-hidden">
+          <div class="flex items-center justify-between px-5 py-3 border-b-2 border-amber-800 bg-stone-900/60">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">🗺️</span>
+              <h2 class="font-fantasy text-lg sm:text-2xl font-black text-amber-300 tracking-wide">Kingdom Campaign Map</h2>
+            </div>
+            <div class="flex items-center gap-2">
+              <button id="unlock-all-btn" class="kr-btn-stone px-3 py-1 rounded-lg font-extrabold text-xs text-amber-300" title="Unlock all stages & grant +20 Stars for sandbox testing">🔓 Unlock All +20⭐</button>
+              <button id="close-levels-btn" class="kr-btn px-3 py-1 rounded-lg font-black text-sm">✕ Close</button>
+            </div>
+          </div>
+          <div id="levels-grid" class="p-4 sm:p-5 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm"></div>
+        </div>
+      </div>
+
+      <!-- ================= ROYAL STAR TECH TREE MODAL ================= -->
+      <div id="tech-modal" class="hidden absolute inset-0 bg-black/85 backdrop-blur-sm z-40 flex items-center justify-center p-4">
+        <div class="kr-panel w-full max-w-4xl max-h-[88%] flex flex-col overflow-hidden">
+          <div class="flex items-center justify-between px-5 py-3 border-b-2 border-amber-800 bg-stone-900/60">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">🌟</span>
+              <div>
+                <h2 class="font-fantasy text-lg sm:text-2xl font-black text-amber-300 tracking-wide">Royal Star Tech Tree</h2>
+                <p class="text-[11px] text-amber-200/80">Spend Campaign Stars to unlock new Tower Classes, Tier-5 Mythic Ascensions, and Global Buffs!</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="px-3 py-1 rounded-lg bg-stone-950 border border-amber-500 font-black text-yellow-300 text-sm">Available: <span id="tech-stars-avail">3</span> ⭐</span>
+              <button id="reset-tech-btn" class="kr-btn-stone px-2.5 py-1 rounded-lg font-bold text-xs">Reset</button>
+              <button id="close-tech-btn" class="kr-btn px-3 py-1 rounded-lg font-black text-sm">✕ Close</button>
+            </div>
+          </div>
+          <div id="tech-grid" class="p-4 sm:p-5 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs sm:text-sm"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    /*************************************************************************
+     * KINGDOM DEFENDERS: ROYAL RUSH
+     * Complete HTML5 Canvas Fantasy Tower Defense Engine
+     *************************************************************************/
+
+    // =========================================================================
+    // 1. WEB AUDIO API PROCEDURAL SOUND SYNTHESIZER
+    // =========================================================================
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      play(type) {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        try {
+          if (type === 'arrow') {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(520, now);
+            osc.frequency.exponentialRampToValueAtTime(140, now + 0.08);
+            gain.gain.setValueAtTime(0.11, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.08);
+          } else if (type === 'mage') {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(680, now);
+            osc.frequency.exponentialRampToValueAtTime(1180, now + 0.14);
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.15);
+          } else if (type === 'tesla') {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(920, now);
+            osc.frequency.setValueAtTime(340, now + 0.05);
+            osc.frequency.setValueAtTime(760, now + 0.1);
+            gain.gain.setValueAtTime(0.13, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.16);
+          } else if (type === 'boom') {
+            // White noise burst + low bass thump
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(135, now);
+            osc.frequency.exponentialRampToValueAtTime(32, now + 0.28);
+            gain.gain.setValueAtTime(0.24, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.29);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.29);
+          } else if (type === 'sword') {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(880, now);
+            osc.frequency.exponentialRampToValueAtTime(290, now + 0.06);
+            gain.gain.setValueAtTime(0.06, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.06);
+          } else if (type === 'build') {
+            [330, 440, 659].forEach((freq, i) => {
+              const osc = this.ctx.createOscillator();
+              const gain = this.ctx.createGain();
+              osc.type = 'triangle';
+              osc.frequency.setValueAtTime(freq, now + i * 0.055);
+              gain.gain.setValueAtTime(0.16, now + i * 0.055);
+              gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.055 + 0.16);
+              osc.connect(gain);
+              gain.connect(this.ctx.destination);
+              osc.start(now + i * 0.055);
+              osc.stop(now + i * 0.055 + 0.16);
+            });
+          } else if (type === 'coin') {
+            [987, 1318].forEach((freq, i) => {
+              const osc = this.ctx.createOscillator();
+              const gain = this.ctx.createGain();
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(freq, now + i * 0.06);
+              gain.gain.setValueAtTime(0.14, now + i * 0.06);
+              gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.18);
+              osc.connect(gain);
+              gain.connect(this.ctx.destination);
+              osc.start(now + i * 0.06);
+              osc.stop(now + i * 0.06 + 0.18);
+            });
+          } else if (type === 'horn') {
+            [220, 277, 330].forEach((freq, i) => {
+              const osc = this.ctx.createOscillator();
+              const gain = this.ctx.createGain();
+              osc.type = 'sawtooth';
+              osc.frequency.setValueAtTime(freq, now + i * 0.08);
+              gain.gain.setValueAtTime(0.12, now + i * 0.08);
+              gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.35);
+              osc.connect(gain);
+              gain.connect(this.ctx.destination);
+              osc.start(now + i * 0.08);
+              osc.stop(now + i * 0.08 + 0.35);
+            });
+          } else if (type === 'hero') {
+            [440, 554, 659, 880].forEach((freq, i) => {
+              const osc = this.ctx.createOscillator();
+              const gain = this.ctx.createGain();
+              osc.type = 'triangle';
+              osc.frequency.setValueAtTime(freq, now + i * 0.05);
+              gain.gain.setValueAtTime(0.15, now + i * 0.05);
+              gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.05 + 0.22);
+              osc.connect(gain);
+              gain.connect(this.ctx.destination);
+              osc.start(now + i * 0.05);
+              osc.stop(now + i * 0.05 + 0.22);
+            });
+          }
+        } catch (e) {
+          // Ignore audio context errors
+        }
+      }
+    }
+
+    const sfx = new SoundEngine();
+
+    // =========================================================================
+    // 2. GAME DATA: PATHS, TOWER PADS, TOWER SPECS, ENEMY ARCHETYPES, WAVES
+    // =========================================================================
+    const LOGICAL_WIDTH = 1280;
+    const LOGICAL_HEIGHT = 720;
+
+    const CAMPAIGN_STAGES = [
+      {
+        id: 0,
+        name: '1. Greenvale Outpost',
+        biome: 'forest',
+        subtitle: 'Lush Kingdom Borderlands',
+        desc: 'Defend the twin forest roads and stone bridge against Moloch’s vanguard.',
+        startGold: 280,
+        skullWest: { left: '7%', top: '39%' },
+        skullNorth: { left: '43%', top: '8%' },
+        paths: [
+          [
+            { x: 0, y: 285 }, { x: 155, y: 285 }, { x: 255, y: 205 }, { x: 390, y: 195 },
+            { x: 465, y: 295 }, { x: 425, y: 455 }, { x: 540, y: 535 }, { x: 695, y: 485 },
+            { x: 765, y: 335 }, { x: 880, y: 220 }, { x: 1020, y: 250 }, { x: 1085, y: 390 }, { x: 1215, y: 390 }
+          ],
+          [
+            { x: 550, y: 0 }, { x: 555, y: 125 }, { x: 485, y: 225 }, { x: 465, y: 295 },
+            { x: 425, y: 455 }, { x: 540, y: 535 }, { x: 695, y: 485 }, { x: 765, y: 335 },
+            { x: 880, y: 220 }, { x: 1020, y: 250 }, { x: 1085, y: 390 }, { x: 1215, y: 390 }
+          ]
+        ],
+        pads: [
+          { id: 0, x: 185, y: 365, defaultRally: { x: 165, y: 285 } },
+          { id: 1, x: 320, y: 290, defaultRally: { x: 325, y: 200 } },
+          { id: 2, x: 355, y: 110, defaultRally: { x: 365, y: 195 } },
+          { id: 3, x: 560, y: 295, defaultRally: { x: 465, y: 295 } },
+          { id: 4, x: 330, y: 470, defaultRally: { x: 425, y: 450 } },
+          { id: 5, x: 535, y: 430, defaultRally: { x: 535, y: 525 } },
+          { id: 6, x: 645, y: 590, defaultRally: { x: 635, y: 505 } },
+          { id: 7, x: 665, y: 365, defaultRally: { x: 735, y: 390 } },
+          { id: 8, x: 865, y: 335, defaultRally: { x: 815, y: 280 } },
+          { id: 9, x: 950, y: 145, defaultRally: { x: 945, y: 235 } },
+          { id: 10, x: 995, y: 435, defaultRally: { x: 1065, y: 370 } }
+        ]
+      },
+      {
+        id: 1,
+        name: '2. Frostpeak Pass',
+        biome: 'snow',
+        subtitle: 'Frozen Mountain Canyon',
+        desc: 'Icy winds sweep two wide glacial trails that converge at the Eastern Citadel.',
+        startGold: 340,
+        skullWest: { left: '7%', top: '24%' },
+        skullNorth: { left: '7%', top: '72%' },
+        paths: [
+          [
+            { x: 0, y: 175 }, { x: 210, y: 175 }, { x: 370, y: 265 }, { x: 580, y: 220 },
+            { x: 760, y: 310 }, { x: 930, y: 290 }, { x: 1080, y: 390 }, { x: 1215, y: 390 }
+          ],
+          [
+            { x: 0, y: 530 }, { x: 230, y: 530 }, { x: 420, y: 440 }, { x: 615, y: 495 },
+            { x: 760, y: 390 }, { x: 930, y: 410 }, { x: 1080, y: 390 }, { x: 1215, y: 390 }
+          ]
+        ],
+        pads: [
+          { id: 0, x: 195, y: 265, defaultRally: { x: 205, y: 175 } },
+          { id: 1, x: 355, y: 165, defaultRally: { x: 365, y: 255 } },
+          { id: 2, x: 490, y: 345, defaultRally: { x: 485, y: 250 } },
+          { id: 3, x: 600, y: 130, defaultRally: { x: 590, y: 220 } },
+          { id: 4, x: 225, y: 435, defaultRally: { x: 230, y: 530 } },
+          { id: 5, x: 430, y: 545, defaultRally: { x: 425, y: 445 } },
+          { id: 6, x: 635, y: 595, defaultRally: { x: 625, y: 495 } },
+          { id: 7, x: 675, y: 350, defaultRally: { x: 755, y: 350 } },
+          { id: 8, x: 855, y: 205, defaultRally: { x: 850, y: 295 } },
+          { id: 9, x: 855, y: 505, defaultRally: { x: 850, y: 405 } },
+          { id: 10, x: 1015, y: 300, defaultRally: { x: 1045, y: 390 } },
+          { id: 11, x: 1015, y: 485, defaultRally: { x: 1045, y: 390 } }
+        ]
+      },
+      {
+        id: 2,
+        name: '3. Shifting Sands',
+        biome: 'desert',
+        subtitle: 'Sun-Scorched Oasis Dunes',
+        desc: 'Fast Worg packs and flying gargoyles race across the desert serpentines.',
+        startGold: 400,
+        skullWest: { left: '7%', top: '52%' },
+        skullNorth: { left: '50%', top: '8%' },
+        paths: [
+          [
+            { x: 0, y: 380 }, { x: 180, y: 380 }, { x: 270, y: 185 }, { x: 470, y: 185 },
+            { x: 550, y: 525 }, { x: 785, y: 525 }, { x: 865, y: 245 }, { x: 1045, y: 245 },
+            { x: 1105, y: 390 }, { x: 1215, y: 390 }
+          ],
+          [
+            { x: 640, y: 0 }, { x: 640, y: 290 }, { x: 550, y: 525 }, { x: 785, y: 525 },
+            { x: 865, y: 245 }, { x: 1045, y: 245 }, { x: 1105, y: 390 }, { x: 1215, y: 390 }
+          ]
+        ],
+        pads: [
+          { id: 0, x: 155, y: 280, defaultRally: { x: 175, y: 375 } },
+          { id: 1, x: 365, y: 280, defaultRally: { x: 365, y: 185 } },
+          { id: 2, x: 375, y: 95, defaultRally: { x: 375, y: 185 } },
+          { id: 3, x: 440, y: 425, defaultRally: { x: 515, y: 380 } },
+          { id: 4, x: 545, y: 240, defaultRally: { x: 635, y: 240 } },
+          { id: 5, x: 665, y: 430, defaultRally: { x: 665, y: 525 } },
+          { id: 6, x: 665, y: 615, defaultRally: { x: 665, y: 525 } },
+          { id: 7, x: 755, y: 345, defaultRally: { x: 830, y: 365 } },
+          { id: 8, x: 940, y: 345, defaultRally: { x: 940, y: 245 } },
+          { id: 9, x: 955, y: 150, defaultRally: { x: 955, y: 245 } },
+          { id: 10, x: 1020, y: 455, defaultRally: { x: 1095, y: 390 } },
+          { id: 11, x: 1140, y: 280, defaultRally: { x: 1110, y: 375 } }
+        ]
+      },
+      {
+        id: 3,
+        name: '4. Obsidian Citadel',
+        biome: 'volcano',
+        subtitle: 'Molten Hellfire Stronghold',
+        desc: 'The ultimate test! Heavy armor, regeneration, and twin volcanic breach routes.',
+        startGold: 520,
+        skullWest: { left: '7%', top: '30%' },
+        skullNorth: { left: '34%', top: '8%' },
+        paths: [
+          [
+            { x: 0, y: 220 }, { x: 220, y: 220 }, { x: 295, y: 480 }, { x: 540, y: 480 },
+            { x: 660, y: 350 }, { x: 880, y: 350 }, { x: 990, y: 495 }, { x: 1110, y: 390 }, { x: 1215, y: 390 }
+          ],
+          [
+            { x: 430, y: 0 }, { x: 430, y: 215 }, { x: 660, y: 215 }, { x: 660, y: 350 },
+            { x: 880, y: 350 }, { x: 990, y: 210 }, { x: 1110, y: 390 }, { x: 1215, y: 390 }
+          ]
+        ],
+        pads: [
+          { id: 0, x: 165, y: 320, defaultRally: { x: 185, y: 220 } },
+          { id: 1, x: 325, y: 150, defaultRally: { x: 245, y: 225 } },
+          { id: 2, x: 395, y: 385, defaultRally: { x: 395, y: 480 } },
+          { id: 3, x: 415, y: 575, defaultRally: { x: 415, y: 480 } },
+          { id: 4, x: 545, y: 125, defaultRally: { x: 545, y: 215 } },
+          { id: 5, x: 550, y: 315, defaultRally: { x: 645, y: 315 } },
+          { id: 6, x: 770, y: 255, defaultRally: { x: 770, y: 350 } },
+          { id: 7, x: 770, y: 445, defaultRally: { x: 770, y: 350 } },
+          { id: 8, x: 910, y: 135, defaultRally: { x: 965, y: 215 } },
+          { id: 9, x: 995, y: 350, defaultRally: { x: 940, y: 350 } },
+          { id: 10, x: 910, y: 565, defaultRally: { x: 975, y: 485 } },
+          { id: 11, x: 1115, y: 270, defaultRally: { x: 1105, y: 375 } }
+        ]
+      }
+    ];
+
+    let PATHS = CAMPAIGN_STAGES[0].paths;
+    let TOWER_PADS = CAMPAIGN_STAGES[0].pads;
+
+    const TECH_TREE_DEFS = [
+      { id: 'unlock_sunforge', name: 'Unlock: Sunforge Obelisk', icon: '☀️', cost: 1, desc: 'Unlocks the ancient Sunforge Rune Obelisk tower class on all build pads (Continuous True Damage solar beam + buffs nearby towers).' },
+      { id: 'unlock_necro', name: 'Unlock: Necromancer Crypt', icon: '💀', cost: 1, desc: 'Unlocks the Necromancer Crypt tower class on all build pads (Fires soul bolts & raises Skeletal Knights from slain enemies).' },
+      { id: 'unlock_mythic', name: 'Tier-5 Mythic Ascension', icon: '🌌', cost: 2, desc: 'Allows Tier-4 Specialized towers to ascend into crazy-expensive Tier-5 Mythic Super-Towers (650g–950g) + repeatable Overcharges!' },
+      { id: 'war_chest', name: 'Royal War Chest', icon: '🪙', cost: 1, desc: 'Start every stage with +120 bonus Gold and earn +15% more Gold from slain enemies.' },
+      { id: 'tower_mastery', name: 'Master Engineers', icon: '⚒️', cost: 2, desc: 'All Kingdom Towers deal +18% damage and have +10% attack range.' },
+      { id: 'hero_training', name: 'Paladin Champion', icon: '👑', cost: 2, desc: 'Sir Gerald gains +180 Max HP, +8 base damage, and his Holy Smite cooldown is reduced by 2s.' }
+    ];
+
+    // Complete Tower Tree (6 Tower Classes: Tiers 1-3 + Two Tier-4 Specializations + Crazy Expensive Tier-5 Mythic Ascensions)
+    const TOWER_DEFS = {
+      archer: {
+        name: 'Archer Tower',
+        icon: '🏹',
+        type: 'archer',
+        tiers: [
+          { level: 1, name: 'Archer Watchtower', cost: 70, range: 155, dmgMin: 6, dmgMax: 10, rate: 0.72, desc: 'Fast physical arrows. Targets Ground & Flying foes.' },
+          { level: 2, name: 'Marksman Tower', cost: 110, range: 175, dmgMin: 11, dmgMax: 17, rate: 0.62, desc: 'Broadhead arrows with greater range and speed.' },
+          { level: 3, name: 'Sharpshooter Guild', cost: 160, range: 195, dmgMin: 18, dmgMax: 26, rate: 0.52, desc: 'Elite bowmen dealing heavy physical damage.' }
+        ],
+        specializations: {
+          rangers: {
+            key: 'rangers', name: 'Rangers Hideout', icon: '🌲', cost: 230, range: 210, dmgMin: 22, dmgMax: 32, rate: 0.30,
+            desc: 'Ultra-fast fire rate + Poison Arrows (24 true dmg over 3s).',
+            mythic: {
+              name: 'Sylvan Tempest Shrine', icon: '🌪️', cost: 680, range: 255, dmgMin: 48, dmgMax: 68, rate: 0.16,
+              desc: 'MYTHIC T5: Fires twin poison-tipped wind arrows at machine-gun speed!'
+            }
+          },
+          musketeers: {
+            key: 'musketeers', name: 'Musketeer Garrison', icon: '🎯', cost: 235, range: 270, dmgMin: 54, dmgMax: 80, rate: 1.15,
+            desc: 'Extreme range sniper shots with Headshot Crit / Instant-Kill chance!',
+            mythic: {
+              name: 'Sky-Dreadnought Railgun', icon: '🛰️', cost: 740, range: 350, dmgMin: 175, dmgMax: 250, rate: 0.90,
+              desc: 'MYTHIC T5: Map-wide hypersonic rail-slugs with 45% Headshot Instant-Kill!'
+            }
+          }
+        }
+      },
+      barracks: {
+        name: 'Militia Barracks',
+        icon: '🛡️',
+        type: 'barracks',
+        tiers: [
+          { level: 1, name: 'Militia Barracks', cost: 75, range: 135, hp: 125, dmgMin: 5, dmgMax: 9, armor: 0.12, respawn: 9, desc: 'Spawns 3 Militia soldiers to block and fight ground enemies.' },
+          { level: 2, name: 'Footmen Barracks', cost: 115, range: 145, hp: 195, dmgMin: 10, dmgMax: 15, armor: 0.26, respawn: 8, desc: 'Well-trained Footmen in chainmail armor.' },
+          { level: 3, name: 'Knights Barracks', cost: 165, range: 155, hp: 280, dmgMin: 15, dmgMax: 24, armor: 0.42, respawn: 7, desc: 'Royal Knights with heavy plate armor and broadswords.' }
+        ],
+        specializations: {
+          paladins: {
+            key: 'paladins', name: 'Holy Order Paladins', icon: '✨', cost: 240, range: 165, hp: 420, dmgMin: 22, dmgMax: 32, armor: 0.62, respawn: 7,
+            desc: 'Heavy armor, Shield Bash stun strike, and self-healing Holy Light aura!',
+            mythic: {
+              name: 'Seraphim Archangels', icon: '👼', cost: 720, range: 200, hp: 820, dmgMin: 55, dmgMax: 80, armor: 0.78, respawn: 5,
+              desc: 'MYTHIC T5: Immortal winged champions with divine AoE smites & rapid healing!'
+            }
+          },
+          barbarians: {
+            key: 'barbarians', name: 'Barbarian Mead Hall', icon: '🪓', cost: 230, range: 165, hp: 350, dmgMin: 34, dmgMax: 50, armor: 0.22, respawn: 6,
+            desc: 'Whirlwind AoE melee cleave + hurls throwing axes at Flying & Ground enemies!',
+            mythic: {
+              name: 'Titan Warlord Keep', icon: '⚡', cost: 700, range: 200, hp: 680, dmgMin: 82, dmgMax: 118, armor: 0.45, respawn: 5,
+              desc: 'MYTHIC T5: Colossal dual-axe Warlords who cleave whole armies & hurl lightning axes!'
+            }
+          }
+        }
+      },
+      mage: {
+        name: 'Mage Guild',
+        icon: '🔮',
+        type: 'mage',
+        tiers: [
+          { level: 1, name: 'Mage Tower', cost: 100, range: 150, dmgMin: 15, dmgMax: 24, rate: 1.35, desc: 'Fires arcane bolts that ignore Physical Armor.' },
+          { level: 2, name: 'Adept Tower', cost: 150, range: 168, dmgMin: 28, dmgMax: 42, rate: 1.25, desc: 'Concentrated mana bolts that shred armored foes.' },
+          { level: 3, name: 'Wizard Tower', cost: 210, range: 185, dmgMin: 46, dmgMax: 68, rate: 1.15, desc: 'Archmages wielding devastating arcane energy.' }
+        ],
+        specializations: {
+          arcane: {
+            key: 'arcane', name: 'Arcane Wizard', icon: '⚡', cost: 270, range: 205, dmgMin: 78, dmgMax: 112, rate: 1.15,
+            desc: 'High-damage Disintegration Beam & teleports enemies back down the path!',
+            mythic: {
+              name: 'Chronos Singularity Spire', icon: '🌌', cost: 820, range: 255, dmgMin: 190, dmgMax: 275, rate: 0.85,
+              desc: 'MYTHIC T5: Rapid Disintegration Rays + warps entire groups back in time!'
+            }
+          },
+          sorcerer: {
+            key: 'sorcerer', name: 'Sorcerer Mage', icon: '🔥', cost: 260, range: 195, dmgMin: 45, dmgMax: 65, rate: 0.92,
+            desc: 'Twin magic bolts that apply an armor-halving & burning Curse for 5s.',
+            mythic: {
+              name: 'Arch-Demon Hellfire Altar', icon: '🌋', cost: 780, range: 235, dmgMin: 115, dmgMax: 165, rate: 0.65,
+              desc: 'MYTHIC T5: Unleashes 4 cursed hellfire bolts per volley that melt all armor!'
+            }
+          }
+        }
+      },
+      artillery: {
+        name: 'Dwarven Bombard',
+        icon: '💣',
+        type: 'artillery',
+        tiers: [
+          { level: 1, name: 'Dwarven Bombard', cost: 125, range: 155, dmgMin: 16, dmgMax: 28, rate: 2.3, splash: 62, desc: 'Launches explosive shells dealing AoE physical damage to ground clusters.' },
+          { level: 2, name: 'Dwarven Artillery', cost: 175, range: 170, dmgMin: 30, dmgMax: 48, rate: 2.15, splash: 72, desc: 'Heavy black-powder shells with wider blast radius.' },
+          { level: 3, name: 'Dwarven Howitzer', cost: 230, range: 185, dmgMin: 48, dmgMax: 76, rate: 2.0, splash: 82, desc: 'High-caliber siege cannon that obliterates ground armies.' }
+        ],
+        specializations: {
+          bertha: {
+            key: 'bertha', name: '500mm Big Bertha', icon: '🚀', cost: 285, range: 215, dmgMin: 84, dmgMax: 128, rate: 2.1, splash: 110,
+            desc: 'Massive explosion radius + scatters Cluster Bombs and leaves Scorched Earth!',
+            mythic: {
+              name: '1000mm Doomsday Behemoth', icon: '☢️', cost: 880, range: 270, dmgMin: 240, dmgMax: 360, rate: 1.75, splash: 145,
+              desc: 'MYTHIC T5: Tactical earth-shaker shells that carpet-bomb the road in cluster fire!'
+            }
+          },
+          tesla: {
+            key: 'tesla', name: 'Tesla x104', icon: '🌩️', cost: 275, range: 185, dmgMin: 56, dmgMax: 86, rate: 1.5, splash: 90,
+            desc: 'Supercharged chain lightning that arcs across up to 5 Ground & Flying targets!',
+            mythic: {
+              name: 'Omega Storm Generator', icon: '⛈️', cost: 840, range: 230, dmgMin: 145, dmgMax: 210, rate: 1.15, splash: 120,
+              desc: 'MYTHIC T5: Arcs pure plasma lightning across up to 9 targets + stuns foes!'
+            }
+          }
+        }
+      },
+      sunforge: {
+        name: 'Sunforge Obelisk',
+        icon: '☀️',
+        type: 'sunforge',
+        reqTech: 'unlock_sunforge',
+        tiers: [
+          { level: 1, name: 'Solar Obelisk', cost: 135, range: 160, dmgMin: 22, dmgMax: 32, rate: 0.90, desc: 'Focuses a searing True Damage sunbeam & boosts nearby tower speed by 10%.' },
+          { level: 2, name: 'Radiant Spire', cost: 185, range: 180, dmgMin: 40, dmgMax: 56, rate: 0.80, desc: 'Intense solar ray that melts armor & boosts nearby towers by 15%.' },
+          { level: 3, name: 'Sunforge Sanctuary', cost: 245, range: 200, dmgMin: 68, dmgMax: 92, rate: 0.72, desc: 'Blinding True Damage beam & +20% attack speed aura for nearby towers.' }
+        ],
+        specializations: {
+          helios: {
+            key: 'helios', name: 'Helios Prism Lens', icon: '🔆', cost: 310, range: 225, dmgMin: 105, dmgMax: 145, rate: 0.62,
+            desc: 'Splits its solar beam across 2 targets for massive True Damage + 25% tower haste aura!',
+            mythic: {
+              name: 'Supernova Dyson Core', icon: '🌟', cost: 910, range: 270, dmgMin: 240, dmgMax: 330, rate: 0.48,
+              desc: 'MYTHIC T5: Incinerates 3 targets simultaneously with True Damage + 35% tower haste!'
+            }
+          },
+          nova: {
+            key: 'nova', name: 'Solar Flare Beacon', icon: '💥', cost: 300, range: 210, dmgMin: 85, dmgMax: 120, rate: 0.75,
+            desc: 'Emits periodic blinding Solar Novas that damage and stun all nearby enemies!',
+            mythic: {
+              name: 'Celestial Star-Eater', icon: '☄️', cost: 890, range: 255, dmgMin: 210, dmgMax: 290, rate: 0.58,
+              desc: 'MYTHIC T5: Relentless Star-Flare explosions that stun & vaporize everything in range!'
+            }
+          }
+        }
+      },
+      necro: {
+        name: 'Necromancer Crypt',
+        icon: '💀',
+        type: 'necro',
+        reqTech: 'unlock_necro',
+        tiers: [
+          { level: 1, name: 'Acolyte Crypt', cost: 115, range: 155, dmgMin: 14, dmgMax: 22, rate: 1.10, hp: 130, desc: 'Fires dark soul bolts & commands 2 Undead Skeletons on the road.' },
+          { level: 2, name: 'Bone Shrine', cost: 165, range: 175, dmgMin: 26, dmgMax: 38, rate: 1.00, hp: 200, desc: 'Stronger necrotic bolts & tougher Skeletal Warriors.' },
+          { level: 3, name: 'Necromancer Tower', cost: 225, range: 195, dmgMin: 44, dmgMax: 64, rate: 0.90, hp: 290, desc: 'Raises 3 armored Skeletal Knights & drains enemy life.' }
+        ],
+        specializations: {
+          lich: {
+            key: 'lich', name: 'Lich Mausoleum', icon: '👻', cost: 280, range: 215, dmgMin: 72, dmgMax: 105, rate: 0.78, hp: 430,
+            desc: 'Commands 3 Death Knights + Soul Harvest blasts that heal undead minions!',
+            mythic: {
+              name: 'Arch-Lich Soul Citadel', icon: '👑', cost: 860, range: 260, dmgMin: 185, dmgMax: 260, rate: 0.58, hp: 850,
+              desc: 'MYTHIC T5: Unstoppable Dreadlord champions + triple necrotic soul barrages!'
+            }
+          },
+          plague: {
+            key: 'plague', name: 'Plaguebringer Ossuary', icon: '🧪', cost: 270, range: 205, dmgMin: 52, dmgMax: 78, rate: 0.75, hp: 380,
+            desc: 'Spreads contagious Blight clouds (True DoT) + exploding Bone Golems!',
+            mythic: {
+              name: 'Apocalypse Blight Engine', icon: '☣️', cost: 830, range: 245, dmgMin: 140, dmgMax: 205, rate: 0.52, hp: 740,
+              desc: 'MYTHIC T5: Envelops the battlefield in toxic necrotic mist & titan Bone Golems!'
+            }
+          }
+        }
+      }
+    };
+
+    // Enemy Archetypes (Rebalanced melee damage so Hero & Soldiers visibly feel big hits)
+    const ENEMY_DEFS = {
+      goblin: {
+        key: 'goblin',
+        name: 'Goblin Scout',
+        icon: '👺',
+        hp: 65,
+        speed: 58,
+        dmg: 14,
+        armor: 0,
+        magicRes: 0,
+        gold: 10,
+        livesCost: 1,
+        flying: false,
+        radius: 12,
+        desc: 'Fast, low-health swarming goblin raider. No armor.'
+      },
+      orc: {
+        key: 'orc',
+        name: 'Orc Warrior',
+        icon: '👹',
+        hp: 170,
+        speed: 40,
+        dmg: 28,
+        armor: 0.30,
+        magicRes: 0,
+        gold: 18,
+        livesCost: 1,
+        flying: false,
+        radius: 15,
+        desc: 'Brutal frontline warrior with medium physical armor (30%).'
+      },
+      worg: {
+        key: 'worg',
+        name: 'Worg Rider',
+        icon: '🐺',
+        hp: 145,
+        speed: 74,
+        dmg: 24,
+        armor: 0,
+        magicRes: 0.25,
+        gold: 20,
+        livesCost: 1,
+        flying: false,
+        radius: 14,
+        desc: 'Swift wolf cavalry that sprints past unguarded roads. 25% Magic Resist.'
+      },
+      troll: {
+        key: 'troll',
+        name: 'Forest Troll',
+        icon: '🧌',
+        hp: 460,
+        speed: 30,
+        dmg: 54,
+        armor: 0.15,
+        magicRes: 0,
+        regen: 16,
+        gold: 42,
+        livesCost: 2,
+        flying: false,
+        radius: 18,
+        desc: 'Towering forest brute with high HP and rapid health regeneration (16 HP/s)!'
+      },
+      darkknight: {
+        key: 'darkknight',
+        name: 'Dark Knight',
+        icon: '🖤',
+        hp: 350,
+        speed: 32,
+        dmg: 48,
+        armor: 0.75,
+        magicRes: 0,
+        gold: 35,
+        livesCost: 2,
+        flying: false,
+        radius: 16,
+        desc: 'Encased in dark steel (75% Physical Armor). Vulnerable to Mages!'
+      },
+      shaman: {
+        key: 'shaman',
+        name: 'Dark Shaman',
+        icon: '🧙‍♂️',
+        hp: 245,
+        speed: 38,
+        dmg: 22,
+        armor: 0,
+        magicRes: 0.75,
+        gold: 32,
+        livesCost: 1,
+        flying: false,
+        healer: true,
+        radius: 14,
+        desc: 'Casts periodic AoE Ancestral Heal on nearby allies! 75% Magic Resistance.'
+      },
+      gargoyle: {
+        key: 'gargoyle',
+        name: 'Blood Gargoyle',
+        icon: '🦇',
+        hp: 165,
+        speed: 54,
+        dmg: 0,
+        armor: 0,
+        magicRes: 0.15,
+        gold: 22,
+        livesCost: 1,
+        flying: true,
+        radius: 14,
+        desc: 'Flying demon that bypasses barracks blockers and standard artillery.'
+      },
+      boss: {
+        key: 'boss',
+        name: 'Moloch the Juggernaut',
+        icon: '👑',
+        hp: 3200,
+        speed: 22,
+        dmg: 115,
+        armor: 0.42,
+        magicRes: 0.30,
+        regen: 10,
+        gold: 260,
+        livesCost: 10,
+        flying: false,
+        boss: true,
+        radius: 26,
+        desc: 'Colossal Demonic Warlord with heavy armor and a devastating area cleave!'
+      }
+    };
+
+    // 12 Curated Kingdom Rush Waves
+    const WAVES = [
+      {
+        title: 'Wave 1: Goblin Vanguard',
+        groups: [
+          { type: 'goblin', count: 8, interval: 1.1, delay: 0, path: 0 }
+        ]
+      },
+      {
+        title: 'Wave 2: Orcish Patrol',
+        groups: [
+          { type: 'goblin', count: 6, interval: 1.0, delay: 0, path: 0 },
+          { type: 'orc', count: 4, interval: 1.8, delay: 3.5, path: 0 }
+        ]
+      },
+      {
+        title: 'Wave 3: Two-Pronged Raid',
+        groups: [
+          { type: 'goblin', count: 8, interval: 0.9, delay: 0, path: 0 },
+          { type: 'orc', count: 4, interval: 1.6, delay: 1.5, path: 1 },
+          { type: 'worg', count: 4, interval: 1.3, delay: 6.0, path: 0 }
+        ]
+      },
+      {
+        title: 'Wave 4: Iron & Claws',
+        groups: [
+          { type: 'darkknight', count: 3, interval: 2.5, delay: 0, path: 0 },
+          { type: 'worg', count: 6, interval: 1.1, delay: 2.0, path: 1 },
+          { type: 'orc', count: 5, interval: 1.5, delay: 5.5, path: 0 }
+        ]
+      },
+      {
+        title: 'Wave 5: Shadow & Sky (Flying!)',
+        groups: [
+          { type: 'gargoyle', count: 7, interval: 1.3, delay: 0, path: 1 },
+          { type: 'orc', count: 6, interval: 1.4, delay: 1.0, path: 0 },
+          { type: 'shaman', count: 3, interval: 2.4, delay: 3.5, path: 0 }
+        ]
+      },
+      {
+        title: 'Wave 6: Regenerating Trolls',
+        groups: [
+          { type: 'troll', count: 3, interval: 3.2, delay: 0, path: 0 },
+          { type: 'shaman', count: 3, interval: 2.5, delay: 1.5, path: 0 },
+          { type: 'worg', count: 8, interval: 0.9, delay: 3.0, path: 1 }
+        ]
+      },
+      {
+        title: 'Wave 7: Winged Terror',
+        groups: [
+          { type: 'gargoyle', count: 10, interval: 1.0, delay: 0, path: 0 },
+          { type: 'gargoyle', count: 6, interval: 1.2, delay: 2.5, path: 1 },
+          { type: 'darkknight', count: 4, interval: 2.0, delay: 4.0, path: 1 }
+        ]
+      },
+      {
+        title: 'Wave 8: Troll Warband & Steel',
+        groups: [
+          { type: 'troll', count: 4, interval: 2.8, delay: 0, path: 1 },
+          { type: 'darkknight', count: 5, interval: 1.9, delay: 1.0, path: 0 },
+          { type: 'shaman', count: 4, interval: 2.0, delay: 2.5, path: 0 },
+          { type: 'worg', count: 8, interval: 0.85, delay: 6.5, path: 0 }
+        ]
+      },
+      {
+        title: 'Wave 9: The Black Legion',
+        groups: [
+          { type: 'darkknight', count: 7, interval: 1.7, delay: 0, path: 0 },
+          { type: 'shaman', count: 5, interval: 2.0, delay: 1.0, path: 0 },
+          { type: 'troll', count: 3, interval: 3.0, delay: 2.5, path: 1 },
+          { type: 'gargoyle', count: 10, interval: 0.9, delay: 5.0, path: 1 }
+        ]
+      },
+      {
+        title: 'Wave 10: Vanguard of Doom',
+        groups: [
+          { type: 'troll', count: 5, interval: 2.4, delay: 0, path: 0 },
+          { type: 'darkknight', count: 6, interval: 1.7, delay: 1.5, path: 1 },
+          { type: 'worg', count: 12, interval: 0.7, delay: 4.0, path: 0 },
+          { type: 'shaman', count: 4, interval: 2.0, delay: 5.5, path: 1 }
+        ]
+      },
+      {
+        title: 'Wave 11: Sky & Iron Storm',
+        groups: [
+          { type: 'gargoyle', count: 14, interval: 0.8, delay: 0, path: 0 },
+          { type: 'gargoyle', count: 10, interval: 0.85, delay: 1.0, path: 1 },
+          { type: 'troll', count: 5, interval: 2.3, delay: 2.0, path: 0 },
+          { type: 'darkknight', count: 8, interval: 1.5, delay: 3.5, path: 1 }
+        ]
+      },
+      {
+        title: 'Wave 12: Moloch the Juggernaut',
+        groups: [
+          { type: 'boss', count: 1, interval: 5.0, delay: 0, path: 0 },
+          { type: 'troll', count: 4, interval: 2.6, delay: 2.0, path: 1 },
+          { type: 'shaman', count: 5, interval: 2.1, delay: 2.5, path: 0 },
+          { type: 'darkknight', count: 7, interval: 1.8, delay: 4.0, path: 1 },
+          { type: 'gargoyle', count: 12, interval: 1.0, delay: 7.0, path: 0 }
+        ]
+      }
+    ];
+
+    // =========================================================================
+    // 3. STATE MANAGEMENT & GAME VARIABLES
+    // =========================================================================
+    const canvas = document.getElementById('game-canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Offscreen pre-rendered terrain canvas for 60fps performance
+    const bgCanvas = document.createElement('canvas');
+    bgCanvas.width = LOGICAL_WIDTH;
+    bgCanvas.height = LOGICAL_HEIGHT;
+    const bgCtx = bgCanvas.getContext('2d');
+
+    const state = {
+      stageIndex: 0,
+      unlockedStage: 0,
+      starsTotal: 3, // Start with 3 Royal Stars so player can immediately experiment with the Tech Tree!
+      starsSpent: 0,
+      stageStars: [0, 0, 0, 0],
+      tech: {
+        unlock_sunforge: true, // Pre-unlocked or toggleable in Tech Tree
+        unlock_necro: true,
+        unlock_mythic: true,
+        war_chest: false,
+        tower_mastery: false,
+        hero_training: false
+      },
+
+      lives: 20,
+      gold: 280,
+      waveIndex: -1, // 0 to 11
+      maxWaves: 12,
+      endlessMode: false,
+      waveActive: false,
+      nextWaveCountdown: 0,
+      nextWaveMaxTimer: 16,
+      gameSpeed: 1,
+      paused: false,
+      gameOver: false,
+      kills: 0,
+      time: 0,
+
+      // Entities
+      towers: [],
+      enemies: [],
+      soldiers: [], // Barracks troops + Undead Skeletons + Reinforcements
+      projectiles: [],
+      particles: [],
+      scorchedZones: [],
+      floatingTexts: [],
+      comicPopups: [],
+      activeSpawners: [],
+
+      // Interactive Selection & Targeting
+      selectedPad: null,
+      selectedEntity: null, // Can be tower, enemy, soldier, or hero
+      previewRange: null,   // { x, y, r, color }
+      targetingMode: null,  // null | 'fire' | 'reinf' | 'hero' | 'rally'
+      rallyTower: null,
+      mousePos: { x: 640, y: 360 },
+
+      // Global Spells
+      spells: {
+        fire: { cd: 0, maxCd: 26 },
+        reinf: { cd: 0, maxCd: 14 }
+      },
+
+      // Hero Unit: Sir Gerald Lightseeker
+      hero: {
+        id: 'hero',
+        name: 'Sir Gerald Lightseeker',
+        level: 1,
+        xp: 0,
+        xpNext: 100,
+        x: 710,
+        y: 445,
+        homeX: 710,
+        homeY: 445,
+        movingToOrder: false,
+        targetEnemy: null,
+        hp: 340,
+        maxHp: 340,
+        dmgMin: 18,
+        dmgMax: 28,
+        armor: 0.30,
+        speed: 135,
+        attackTimer: 0,
+        skillTimer: 0,
+        swingAnim: 0,
+        hitFlash: 0,
+        outOfCombatTimer: 0,
+        walkCycle: 0,
+        dead: false,
+        respawnTimer: 0,
+        engagedEnemies: [],
+        facing: 1
+      }
+    };
+
+    // Decorative animated foliage & water points
+    const decorTrees = [];
+    const torches = [
+      { x: 1155, y: 315 },
+      { x: 1155, y: 455 },
+      { x: 730, y: 270 },
+      { x: 805, y: 395 }
+    ];
+
+    // =========================================================================
+    // 4. PRE-RENDER LUSH FANTASY MAP TO OFFSCREEN CANVAS
+    // =========================================================================
+    function generateStaticMap() {
+      const stage = CAMPAIGN_STAGES[state.stageIndex] || CAMPAIGN_STAGES[0];
+      PATHS = stage.paths;
+      TOWER_PADS = stage.pads;
+
+      const palettes = {
+        forest: { c0: '#4d7c2b', c1: '#3b6420', c2: '#264514', roadOuter: '#3f3222', roadMid: '#9a7b4f', roadInner: '#b59463', river: '#0284c7', deep: '#0369a1' },
+        snow:   { c0: '#cbd5e1', c1: '#94a3b8', c2: '#64748b', roadOuter: '#475569', roadMid: '#64748b', roadInner: '#94a3b8', river: '#38bdf8', deep: '#0284c7' },
+        desert: { c0: '#eab308', c1: '#ca8a04', c2: '#a16207', roadOuter: '#78350f', roadMid: '#b45309', roadInner: '#d97706', river: '#06b6d4', deep: '#0891b2' },
+        volcano:{ c0: '#292524', c1: '#1c1917', c2: '#0c0a09', roadOuter: '#451a03', roadMid: '#44403c', roadInner: '#57534e', river: '#ea580c', deep: '#dc2626' }
+      };
+      const pal = palettes[stage.biome] || palettes.forest;
+
+      // 1. Rich biome ground gradient
+      const grassGrad = bgCtx.createRadialGradient(640, 360, 80, 640, 360, 780);
+      grassGrad.addColorStop(0, pal.c0);
+      grassGrad.addColorStop(0.6, pal.c1);
+      grassGrad.addColorStop(1, pal.c2);
+      bgCtx.fillStyle = grassGrad;
+      bgCtx.fillRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+
+      // Subtle terrain texture patches
+      for (let i = 0; i < 240; i++) {
+        const gx = (Math.sin(i * 78.233) * 0.5 + 0.5) * LOGICAL_WIDTH;
+        const gy = (Math.cos(i * 45.164) * 0.5 + 0.5) * LOGICAL_HEIGHT;
+        const gr = 18 + (i % 35);
+        bgCtx.fillStyle = i % 2 === 0 ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.12)';
+        bgCtx.beginPath();
+        bgCtx.arc(gx, gy, gr, 0, Math.PI * 2);
+        bgCtx.fill();
+      }
+
+      // 2. Winding River / Lava Channel
+      bgCtx.save();
+      bgCtx.lineCap = 'round';
+      bgCtx.lineJoin = 'round';
+      bgCtx.strokeStyle = '#57534e';
+      bgCtx.lineWidth = 72;
+      bgCtx.beginPath();
+      bgCtx.moveTo(690, -30);
+      bgCtx.quadraticCurveTo(735, 190, 765, 335);
+      bgCtx.quadraticCurveTo(795, 495, 890, 750);
+      bgCtx.stroke();
+
+      bgCtx.strokeStyle = pal.river;
+      bgCtx.lineWidth = 56;
+      bgCtx.stroke();
+
+      bgCtx.strokeStyle = pal.deep;
+      bgCtx.lineWidth = 34;
+      bgCtx.stroke();
+      bgCtx.restore();
+
+      // 3. Draw Winding Dirt & Cobblestone Roads (Both Paths)
+      const drawRoadPass = (width, color, dashed = false) => {
+        bgCtx.save();
+        bgCtx.lineCap = 'round';
+        bgCtx.lineJoin = 'round';
+        bgCtx.lineWidth = width;
+        bgCtx.strokeStyle = color;
+        if (dashed) bgCtx.setLineDash([14, 18]);
+        for (const path of PATHS) {
+          bgCtx.beginPath();
+          bgCtx.moveTo(path[0].x, path[0].y);
+          for (let i = 1; i < path.length; i++) {
+            bgCtx.lineTo(path[i].x, path[i].y);
+          }
+          bgCtx.stroke();
+        }
+        bgCtx.restore();
+      };
+
+      drawRoadPass(68, pal.roadOuter);
+      drawRoadPass(56, pal.roadMid);
+      drawRoadPass(40, pal.roadInner);
+      drawRoadPass(24, pal.roadMid, true);
+
+      // 4. Draw Dark Enemy Entrance Portals at start of each path
+      const drawDarkGate = (x, y) => {
+        bgCtx.save();
+        bgCtx.translate(x, y);
+        bgCtx.fillStyle = '#1c1917';
+        bgCtx.beginPath();
+        bgCtx.arc(0, 0, 38, 0, Math.PI * 2);
+        bgCtx.fill();
+        bgCtx.strokeStyle = '#57534e';
+        bgCtx.lineWidth = 6;
+        bgCtx.stroke();
+        const rift = bgCtx.createRadialGradient(0, 0, 4, 0, 0, 30);
+        rift.addColorStop(0, '#ef4444');
+        rift.addColorStop(0.6, '#7f1d1d');
+        rift.addColorStop(1, 'transparent');
+        bgCtx.fillStyle = rift;
+        bgCtx.beginPath();
+        bgCtx.arc(0, 0, 30, 0, Math.PI * 2);
+        bgCtx.fill();
+        bgCtx.restore();
+      };
+      drawDarkGate(Math.max(16, PATHS[0][0].x), Math.max(16, PATHS[0][0].y));
+      if (PATHS[1]) drawDarkGate(Math.max(16, PATHS[1][0].x), Math.max(16, PATHS[1][0].y));
+
+      // 5. Royal Castle Gate at Exit (Right side: 1215, 390)
+      bgCtx.save();
+      bgCtx.translate(1215, 390);
+      bgCtx.fillStyle = '#78716c';
+      bgCtx.fillRect(-45, -75, 95, 150);
+      bgCtx.fillStyle = '#d6d3d1';
+      bgCtx.strokeStyle = '#292524';
+      bgCtx.lineWidth = 3;
+      bgCtx.fillRect(-20, -85, 75, 170);
+      bgCtx.strokeRect(-20, -85, 75, 170);
+      bgCtx.fillStyle = '#1c1917';
+      bgCtx.beginPath();
+      bgCtx.arc(-20, 0, 36, Math.PI * 0.5, Math.PI * 1.5, true);
+      bgCtx.fill();
+      bgCtx.strokeStyle = '#78716c';
+      bgCtx.lineWidth = 2;
+      for (let py = -28; py <= 28; py += 11) {
+        bgCtx.beginPath();
+        bgCtx.moveTo(-20, py);
+        bgCtx.lineTo(12, py);
+        bgCtx.stroke();
+      }
+      [-75, 75].forEach(ty => {
+        bgCtx.fillStyle = '#e7e5e4';
+        bgCtx.beginPath();
+        bgCtx.arc(-18, ty, 28, 0, Math.PI * 2);
+        bgCtx.fill();
+        bgCtx.stroke();
+
+        bgCtx.fillStyle = '#1d4ed8';
+        bgCtx.beginPath();
+        bgCtx.arc(-18, ty, 21, 0, Math.PI * 2);
+        bgCtx.fill();
+        bgCtx.stroke();
+
+        bgCtx.fillStyle = '#fbbf24';
+        bgCtx.beginPath();
+        bgCtx.arc(-18, ty, 6, 0, Math.PI * 2);
+        bgCtx.fill();
+      });
+      bgCtx.restore();
+
+      // 6. Generate Decorative Trees & Rocks (avoiding roads and pads)
+      decorTrees.length = 0;
+      const isNearRoadOrPad = (x, y, minDist) => {
+        if (x > 1110 && y > 260 && y < 520) return true;
+        if (Math.abs(x - 765) < 75) return true;
+        for (const pad of TOWER_PADS) {
+          if (Math.hypot(x - pad.x, y - pad.y) < minDist + 24) return true;
+        }
+        for (const path of PATHS) {
+          for (let i = 0; i < path.length - 1; i++) {
+            const d = distToSegment({ x, y }, path[i], path[i + 1]);
+            if (d < minDist) return true;
+          }
+        }
+        return false;
+      };
+
+      let seed = 42 + state.stageIndex * 137;
+      const rand = () => {
+        seed = (seed * 1664525 + 1013904223) % 4294967296;
+        return seed / 4294967296;
+      };
+
+      for (let i = 0; i < 130; i++) {
+        const tx = 35 + rand() * (LOGICAL_WIDTH - 90);
+        const ty = 35 + rand() * (LOGICAL_HEIGHT - 70);
+        if (!isNearRoadOrPad(tx, ty, 58)) {
+          const scale = 0.75 + rand() * 0.50;
+          const hue = stage.biome === 'snow' ? 'pine' : stage.biome === 'desert' ? 'palm' : stage.biome === 'volcano' ? 'spire' : (rand() > 0.3 ? 'oak' : 'pine');
+          decorTrees.push({ x: tx, y: ty, scale, hue, phase: rand() * Math.PI * 2 });
+        }
+      }
+    }
+
+    function distToSegment(p, v, w) {
+      const l2 = (v.x - w.x) ** 2 + (v.y - w.y) ** 2;
+      if (l2 === 0) return Math.hypot(p.x - v.x, p.y - v.y);
+      let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
+      t = Math.max(0, Math.min(1, t));
+      return Math.hypot(p.x - (v.x + t * (w.x - v.x)), p.y - (v.y + t * (w.y - v.y)));
+    }
+
+    // =========================================================================
+    // 5. INITIALIZATION & GAME RESET
+    // =========================================================================
+    function initGame() {
+      const stage = CAMPAIGN_STAGES[state.stageIndex] || CAMPAIGN_STAGES[0];
+      generateStaticMap();
+
+      state.lives = 20;
+      state.gold = stage.startGold + (state.tech.war_chest ? 120 : 0);
+      state.waveIndex = -1;
+      state.endlessMode = false;
+      state.waveActive = false;
+      state.nextWaveCountdown = 0;
+      state.gameSpeed = 1;
+      state.paused = false;
+      state.gameOver = false;
+      state.kills = 0;
+      state.time = 0;
+
+      state.towers = [];
+      state.enemies = [];
+      state.soldiers = [];
+      state.projectiles = [];
+      state.particles = [];
+      state.scorchedZones = [];
+      state.floatingTexts = [];
+      state.comicPopups = [];
+      state.activeSpawners = [];
+
+      state.selectedPad = null;
+      state.selectedEntity = null;
+      state.previewRange = null;
+      state.targetingMode = null;
+
+      state.spells.fire.cd = 0;
+      state.spells.reinf.cd = 0;
+
+      // Position Early Wave Skull Markers for current Stage
+      const skullWestEl = document.getElementById('skull-call-container');
+      const skullNorthEl = document.getElementById('skull-north-container');
+      skullWestEl.style.left = stage.skullWest.left;
+      skullWestEl.style.top = stage.skullWest.top;
+      skullNorthEl.style.left = stage.skullNorth.left;
+      skullNorthEl.style.top = stage.skullNorth.top;
+
+      // Reset Hero Sir Gerald at stage gate choke point
+      const baseHp = 340 + (state.tech.hero_training ? 180 : 0);
+      const baseDmgMin = 18 + (state.tech.hero_training ? 8 : 0);
+      const baseDmgMax = 28 + (state.tech.hero_training ? 10 : 0);
+      Object.assign(state.hero, {
+        level: 1,
+        xp: 0,
+        xpNext: 90,
+        x: 1050,
+        y: 385,
+        homeX: 1050,
+        homeY: 385,
+        movingToOrder: false,
+        targetEnemy: null,
+        hp: baseHp,
+        maxHp: baseHp,
+        dmgMin: baseDmgMin,
+        dmgMax: baseDmgMax,
+        armor: 0.28,
+        attackTimer: 0,
+        skillTimer: 0,
+        swingAnim: 0,
+        hitFlash: 0,
+        outOfCombatTimer: 0,
+        walkCycle: 0,
+        dead: false,
+        respawnTimer: 0,
+        engagedEnemies: []
+      });
+
+      closeRadialMenu();
+      document.getElementById('gameover-modal').classList.add('hidden');
+      document.getElementById('btn-speed').textContent = '1x';
+      document.getElementById('btn-pause').textContent = '⏸️';
+      document.getElementById('hud-stage-label').textContent = `Stage ${state.stageIndex + 1}`;
+      updateTopHUD();
+      updateSkullMarkerUI();
+      updateInspector();
+    }
+
+    // =========================================================================
+    // 6. WAVE SPAWNING & EARLY WAVE CALL SYSTEM
+    // =========================================================================
+    function callNextWave(isEarlyClick = false) {
+      if (state.gameOver) return;
+      if (state.waveIndex + 1 >= state.maxWaves && !state.endlessMode) return;
+
+      // Grant Early Wave Bonus Gold & Spell Cooldown Reduction if called while countdown active
+      if (isEarlyClick && state.waveIndex >= 0 && state.nextWaveCountdown > 0) {
+        const bonusGold = Math.max(8, Math.round(state.nextWaveCountdown * 2.5));
+        state.gold += bonusGold;
+        state.spells.fire.cd = Math.max(0, state.spells.fire.cd - state.nextWaveCountdown * 0.6);
+        state.spells.reinf.cd = Math.max(0, state.spells.reinf.cd - state.nextWaveCountdown * 0.6);
+        addFloatingText(95, 250, `+${bonusGold}g EARLY BONUS!`, '#fbbf24', 16);
+        sfx.play('coin');
+      }
+
+      state.waveIndex++;
+      state.waveActive = true;
+      state.nextWaveCountdown = 0;
+      sfx.play('horn');
+
+      let waveData;
+      if (state.waveIndex < WAVES.length) {
+        waveData = WAVES[state.waveIndex];
+      } else {
+        // Procedural Endless Wave Scaling after Wave 12
+        const scale = state.waveIndex - 10;
+        waveData = {
+          title: `Endless Wave ${state.waveIndex + 1}`,
+          groups: [
+            { type: 'troll', count: 4 + scale, interval: 2.0, delay: 0, path: 0 },
+            { type: 'darkknight', count: 5 + scale * 2, interval: 1.5, delay: 0.5, path: 1 },
+            { type: 'shaman', count: 4 + scale, interval: 1.9, delay: 1.5, path: 0 },
+            { type: 'gargoyle', count: 8 + scale * 2, interval: 0.9, delay: 2.0, path: 1 },
+            { type: 'worg', count: 8 + scale * 2, interval: 0.7, delay: 4.5, path: 1 },
+            ...(state.waveIndex % 2 === 1 ? [{ type: 'boss', count: 1 + Math.floor(scale / 3), interval: 6.0, delay: 5.0, path: 0 }] : [])
+          ]
+        };
+      }
+
+      addFloatingText(640, 110, waveData.title.toUpperCase(), '#fde68a', 22);
+
+      // Register active group spawners
+      for (const g of waveData.groups) {
+        state.activeSpawners.push({
+          type: g.type,
+          remaining: g.count,
+          interval: g.interval,
+          timer: g.delay,
+          pathIndex: g.path || 0
+        });
+      }
+
+      updateTopHUD();
+      updateSkullMarkerUI();
+    }
+
+    function spawnEnemy(typeKey, pathIndex) {
+      const def = ENEMY_DEFS[typeKey];
+      const path = PATHS[pathIndex] || PATHS[0];
+      // Stage difficulty & Endless HP multiplier
+      const stageMult = 1 + state.stageIndex * 0.22;
+      const waveMult = state.waveIndex >= 12 ? 1 + (state.waveIndex - 11) * 0.32 : 1 + state.waveIndex * 0.05;
+      const maxHp = Math.round(def.hp * stageMult * waveMult);
+      const scaledDmg = Math.round(def.dmg * (1 + state.stageIndex * 0.15));
+
+      state.enemies.push({
+        id: 'e_' + Math.random().toString(36).slice(2, 9),
+        type: def.key,
+        name: def.name,
+        icon: def.icon,
+        desc: def.desc,
+        x: path[0].x + (Math.random() - 0.5) * 10,
+        y: path[0].y + (Math.random() - 0.5) * 10,
+        pathIndex,
+        waypointIndex: 1,
+        hp: maxHp,
+        maxHp,
+        speed: def.speed,
+        dmg: scaledDmg,
+        armor: def.armor,
+        magicRes: def.magicRes,
+        regen: def.regen || 0,
+        gold: Math.round(def.gold * (state.tech.war_chest ? 1.15 : 1)),
+        livesCost: def.livesCost,
+        flying: def.flying,
+        healer: !!def.healer,
+        boss: !!def.boss,
+        radius: def.radius,
+        blockedBy: null, // Reference to soldier or hero blocking this enemy
+        inMeleeContact: false,
+        attackTimer: 0.25, // Strikes quickly upon melee contact!
+        swingAnim: 0,
+        healTimer: 2.0,
+        stunTimer: 0,
+        poisonTimer: 0,
+        poisonDps: 0,
+        curseTimer: 0,
+        facing: 1,
+        walkCycle: Math.random() * Math.PI * 2
+      });
+    }
+
+    // =========================================================================
+    // 7. TOWER BUILDING, UPGRADING, SELLING & RALLY POINTS
+    // =========================================================================
+    function buildTower(pad, towerType) {
+      const def = TOWER_DEFS[towerType];
+      const tier1 = def.tiers[0];
+      if (state.gold < tier1.cost) {
+        addFloatingText(pad.x, pad.y - 20, 'Not Enough Gold!', '#ef4444', 15);
+        return;
+      }
+
+      state.gold -= tier1.cost;
+      sfx.play('build');
+
+      const dmgMult = state.tech.tower_mastery ? 1.18 : 1;
+      const rangeMult = state.tech.tower_mastery ? 1.10 : 1;
+
+      const tower = {
+        id: 't_' + pad.id,
+        padId: pad.id,
+        x: pad.x,
+        y: pad.y,
+        type: towerType,
+        icon: def.icon,
+        tier: 1,
+        overchargeLevel: 0,
+        spec: null,
+        name: tier1.name,
+        desc: tier1.desc,
+        investedGold: tier1.cost,
+        range: Math.round(tier1.range * rangeMult),
+        dmgMin: Math.round((tier1.dmgMin || 0) * dmgMult),
+        dmgMax: Math.round((tier1.dmgMax || 0) * dmgMult),
+        rate: tier1.rate || 1,
+        splash: tier1.splash || 0,
+        cooldown: 0,
+        shotCounter: 0,
+        specialCooldown: 6,
+        aimAngle: 0,
+        recoil: 0,
+        beamTargets: [],
+        beamTimer: 0,
+        rallyX: pad.defaultRally.x,
+        rallyY: pad.defaultRally.y
+      };
+
+      state.towers.push(tower);
+      spawnBurstParticles(pad.x, pad.y, '#fbbf24', 14);
+
+      if (towerType === 'barracks' || towerType === 'necro') {
+        spawnBarracksSoldiers(tower);
+      }
+
+      closeRadialMenu();
+      state.selectedEntity = tower;
+      updateTopHUD();
+      updateInspector();
+    }
+
+    function upgradeTower(tower, specKey = null) {
+      const def = TOWER_DEFS[tower.type];
+      const dmgMult = state.tech.tower_mastery ? 1.18 : 1;
+      const rangeMult = state.tech.tower_mastery ? 1.10 : 1;
+      let nextData;
+
+      if (tower.tier < 3) {
+        nextData = def.tiers[tower.tier];
+      } else if (tower.tier === 3 && specKey) {
+        nextData = def.specializations[specKey];
+      } else if (tower.tier === 4 && tower.spec) {
+        nextData = def.specializations[tower.spec].mythic;
+      } else if (tower.tier >= 5) {
+        // Repeatable Mythic Overcharge beyond Tier 5!
+        const overCost = 1100 + tower.overchargeLevel * 450;
+        if (state.gold < overCost) {
+          addFloatingText(tower.x, tower.y - 20, 'Not Enough Gold!', '#ef4444', 15);
+          return;
+        }
+        state.gold -= overCost;
+        tower.investedGold += overCost;
+        tower.overchargeLevel++;
+        tower.dmgMin = Math.round(tower.dmgMin * 1.28);
+        tower.dmgMax = Math.round(tower.dmgMax * 1.28);
+        tower.range = Math.round(tower.range * 1.06);
+        tower.rate = Math.max(0.12, +(tower.rate * 0.90).toFixed(2));
+        sfx.play('hero');
+        spawnBurstParticles(tower.x, tower.y, '#38bdf8', 24);
+        addFloatingText(tower.x, tower.y - 28, `MYTHIC OVERCHARGE +${tower.overchargeLevel}!`, '#38bdf8', 16);
+        closeRadialMenu();
+        updateTopHUD();
+        updateInspector();
+        return;
+      } else {
+        return;
+      }
+
+      if (state.gold < nextData.cost) {
+        addFloatingText(tower.x, tower.y - 20, 'Not Enough Gold!', '#ef4444', 15);
+        return;
+      }
+
+      state.gold -= nextData.cost;
+      tower.investedGold += nextData.cost;
+      tower.tier++;
+      if (specKey) {
+        tower.spec = specKey;
+      }
+      if (nextData.icon) tower.icon = nextData.icon;
+      tower.name = nextData.name;
+      tower.desc = nextData.desc;
+      tower.range = Math.round(nextData.range * rangeMult);
+      tower.dmgMin = Math.round((nextData.dmgMin || 0) * dmgMult);
+      tower.dmgMax = Math.round((nextData.dmgMax || 0) * dmgMult);
+      tower.rate = nextData.rate || tower.rate;
+      tower.splash = nextData.splash || tower.splash;
+
+      sfx.play(tower.tier === 5 ? 'hero' : 'build');
+      spawnBurstParticles(tower.x, tower.y, tower.tier === 5 ? '#38bdf8' : '#fde047', 22);
+      addFloatingText(tower.x, tower.y - 28, `${tower.name}!`, tower.tier === 5 ? '#38bdf8' : '#fde047', 16);
+
+      // Update active barracks / necromancer troops immediately
+      if (tower.type === 'barracks' || tower.type === 'necro') {
+        for (const s of state.soldiers) {
+          if (s.towerId === tower.id) {
+            s.maxHp = nextData.hp || s.maxHp + 120;
+            s.hp = s.maxHp;
+            s.dmgMin = tower.dmgMin || s.dmgMin + 10;
+            s.dmgMax = tower.dmgMax || s.dmgMax + 15;
+            s.armor = nextData.armor !== undefined ? nextData.armor : s.armor;
+            s.respawnTime = nextData.respawn || 6;
+            s.spec = tower.spec;
+            s.tier = tower.tier;
+            s.name = tower.name + ' Unit';
+          }
+        }
+      }
+
+      closeRadialMenu();
+      state.selectedEntity = tower;
+      updateTopHUD();
+      updateInspector();
+    }
+
+    function sellTower(tower) {
+      const refund = Math.round(tower.investedGold * 0.70);
+      state.gold += refund;
+      sfx.play('coin');
+      addFloatingText(tower.x, tower.y - 15, `+${refund}g (70% Refund)`, '#fbbf24', 15);
+      spawnBurstParticles(tower.x, tower.y, '#d6d3d1', 12);
+
+      // Remove associated barracks soldiers & release blocked enemies
+      if (tower.type === 'barracks') {
+        for (let i = state.soldiers.length - 1; i >= 0; i--) {
+          const s = state.soldiers[i];
+          if (s.towerId === tower.id) {
+            if (s.engagedEnemy) s.engagedEnemy.blockedBy = null;
+            state.soldiers.splice(i, 1);
+          }
+        }
+      }
+
+      state.towers = state.towers.filter(t => t.id !== tower.id);
+      if (state.selectedEntity === tower) state.selectedEntity = null;
+      closeRadialMenu();
+      updateTopHUD();
+      updateInspector();
+    }
+
+    function spawnBarracksSoldiers(tower) {
+      const def = TOWER_DEFS[tower.type];
+      const tierData = def.tiers[tower.tier - 1];
+      const isNecro = tower.type === 'necro';
+      const offsets = [
+        { dx: -18, dy: -12 },
+        { dx: 18, dy: -12 },
+        { dx: 0, dy: 16 }
+      ];
+      offsets.forEach((off, idx) => {
+        state.soldiers.push({
+          id: `${tower.id}_s${idx}`,
+          towerId: tower.id,
+          isReinforcement: false,
+          isSkeleton: isNecro,
+          name: isNecro ? 'Skeletal Knight' : 'Militia Soldier',
+          x: tower.x,
+          y: tower.y,
+          homeX: tower.rallyX + off.dx,
+          homeY: tower.rallyY + off.dy,
+          offsetX: off.dx,
+          offsetY: off.dy,
+          hp: tierData.hp || 130,
+          maxHp: tierData.hp || 130,
+          dmgMin: tierData.dmgMin,
+          dmgMax: tierData.dmgMax,
+          armor: tierData.armor || 0.15,
+          respawnTime: tierData.respawn || 8,
+          respawnTimer: 0,
+          dead: false,
+          spec: tower.spec,
+          tier: tower.tier,
+          engagedEnemy: null,
+          attackTimer: 0,
+          swingAnim: 0,
+          walkCycle: 0,
+          skillTimer: 4,
+          facing: 1
+        });
+      });
+    }
+
+    // =========================================================================
+    // 8. RADIAL MENU SYSTEM (BUILD & UPGRADE)
+    // =========================================================================
+    const radialMenuEl = document.getElementById('radial-menu');
+    const radialNodesEl = document.getElementById('radial-nodes-container');
+    const radialTooltipEl = document.getElementById('radial-tooltip');
+
+    function openRadialMenuForPad(pad) {
+      state.selectedPad = pad;
+      state.selectedEntity = null;
+      positionRadialMenu(pad.x, pad.y);
+      radialNodesEl.innerHTML = '';
+
+      const buildOptions = [
+        { type: 'archer', angle: -150, def: TOWER_DEFS.archer.tiers[0], icon: '🏹', title: 'Archer Tower', color: 'from-emerald-700 to-green-950' },
+        { type: 'barracks', angle: -90, def: TOWER_DEFS.barracks.tiers[0], icon: '🛡️', title: 'Militia Barracks', color: 'from-blue-700 to-indigo-950' },
+        { type: 'mage', angle: -30, def: TOWER_DEFS.mage.tiers[0], icon: '🔮', title: 'Mage Guild', color: 'from-purple-700 to-violet-950' },
+        { type: 'artillery', angle: 30, def: TOWER_DEFS.artillery.tiers[0], icon: '💣', title: 'Dwarven Bombard', color: 'from-amber-700 to-stone-900' }
+      ];
+
+      if (state.tech.unlock_sunforge) {
+        buildOptions.push({ type: 'sunforge', angle: 90, def: TOWER_DEFS.sunforge.tiers[0], icon: '☀️', title: 'Sunforge Obelisk', color: 'from-yellow-500 to-orange-900' });
+      }
+      if (state.tech.unlock_necro) {
+        buildOptions.push({ type: 'necro', angle: 150, def: TOWER_DEFS.necro.tiers[0], icon: '💀', title: 'Necromancer Crypt', color: 'from-teal-700 to-slate-950' });
+      }
+
+      buildOptions.forEach(opt => {
+        const rad = (opt.angle * Math.PI) / 180;
+        const nx = 98 + Math.cos(rad) * 76;
+        const ny = 98 + Math.sin(rad) * 76;
+        const canAfford = state.gold >= opt.def.cost;
+
+        const btn = document.createElement('button');
+        btn.className = `radial-node absolute w-14 h-14 -ml-7 -mt-7 rounded-full bg-gradient-to-b ${opt.color} border-2 ${canAfford ? 'border-amber-300' : 'border-red-500 opacity-75'} flex flex-col items-center justify-center`;
+        btn.style.left = `${nx}px`;
+        btn.style.top = `${ny}px`;
+        btn.innerHTML = `
+          <span class="text-xl leading-none">${opt.icon}</span>
+          <span class="text-[10px] font-black px-1 rounded bg-black/75 ${canAfford ? 'text-yellow-300' : 'text-red-400'} mt-0.5">${opt.def.cost}g</span>
+        `;
+
+        btn.addEventListener('mouseenter', () => {
+          state.previewRange = { x: pad.x, y: pad.y, r: opt.def.range, color: 'rgba(251, 191, 36, 0.35)' };
+          showRadialTooltip(opt.title, opt.def.desc, `Cost: ${opt.def.cost}g | Range: ${opt.def.range}`);
+        });
+        btn.addEventListener('mouseleave', () => {
+          state.previewRange = null;
+          hideRadialTooltip();
+        });
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          buildTower(pad, opt.type);
+        });
+
+        radialNodesEl.appendChild(btn);
+      });
+
+      radialMenuEl.classList.remove('opacity-0', 'scale-75');
+      radialMenuEl.classList.add('active', 'opacity-100', 'scale-100');
+      updateInspector();
+    }
+
+    function openRadialMenuForTower(tower) {
+      state.selectedPad = null;
+      state.selectedEntity = tower;
+      positionRadialMenu(tower.x, tower.y);
+      radialNodesEl.innerHTML = '';
+
+      const def = TOWER_DEFS[tower.type];
+      const nodes = [];
+
+      // Upgrade Node(s)
+      if (tower.tier < 3) {
+        const nextTier = def.tiers[tower.tier];
+        nodes.push({
+          angle: -90,
+          icon: '⬆️',
+          cost: nextTier.cost,
+          title: `Upgrade: ${nextTier.name}`,
+          desc: nextTier.desc,
+          stats: `Cost: ${nextTier.cost}g | Dmg: ${nextTier.dmgMin}-${nextTier.dmgMax}`,
+          range: nextTier.range,
+          color: 'from-amber-500 to-amber-800',
+          onClick: () => upgradeTower(tower)
+        });
+      } else if (tower.tier === 3) {
+        // Two Branching Tier-4 Specializations!
+        const specKeys = Object.keys(def.specializations);
+        const specA = def.specializations[specKeys[0]];
+        const specB = def.specializations[specKeys[1]];
+
+        nodes.push({
+          angle: -130,
+          icon: specA.icon,
+          cost: specA.cost,
+          title: `T4: ${specA.name}`,
+          desc: specA.desc,
+          stats: `Specialization A | Cost: ${specA.cost}g`,
+          range: specA.range,
+          color: 'from-emerald-600 to-teal-950',
+          onClick: () => upgradeTower(tower, specA.key)
+        });
+        nodes.push({
+          angle: -50,
+          icon: specB.icon,
+          cost: specB.cost,
+          title: `T4: ${specB.name}`,
+          desc: specB.desc,
+          stats: `Specialization B | Cost: ${specB.cost}g`,
+          range: specB.range,
+          color: 'from-rose-600 to-red-950',
+          onClick: () => upgradeTower(tower, specB.key)
+        });
+      } else if (tower.tier === 4 && tower.spec && state.tech.unlock_mythic) {
+        // Crazy Expensive Tier-5 MYTHIC Ascension!
+        const mythic = def.specializations[tower.spec].mythic;
+        nodes.push({
+          angle: -90,
+          icon: mythic.icon,
+          cost: mythic.cost,
+          title: `🌌 MYTHIC T5: ${mythic.name}`,
+          desc: mythic.desc,
+          stats: `Mythic Ascension | Cost: ${mythic.cost}g`,
+          range: mythic.range,
+          color: 'from-sky-500 via-indigo-700 to-purple-950',
+          onClick: () => upgradeTower(tower)
+        });
+      } else if (tower.tier >= 5) {
+        // Repeatable Mythic Overcharge (1100g+)
+        const overCost = 1100 + tower.overchargeLevel * 450;
+        nodes.push({
+          angle: -90,
+          icon: '⚡',
+          cost: overCost,
+          title: `Mythic Overcharge +${tower.overchargeLevel + 1}`,
+          desc: 'Supercharge this Mythic Tower for +28% Damage, +6% Range, and +10% Attack Speed!',
+          stats: `Repeatable Super-Upgrade | Cost: ${overCost}g`,
+          range: Math.round(tower.range * 1.06),
+          color: 'from-cyan-400 to-blue-950',
+          onClick: () => upgradeTower(tower)
+        });
+      }
+
+      // Barracks / Necromancer Rally Point Button
+      if (tower.type === 'barracks' || tower.type === 'necro') {
+        nodes.push({
+          angle: 20,
+          icon: '🚩',
+          label: 'RALLY',
+          title: 'Change Rally Point',
+          desc: 'Move your 3 troops to a new position on the road within range.',
+          stats: 'Click within blue circle',
+          range: tower.range,
+          color: 'from-sky-500 to-blue-900',
+          onClick: () => {
+            closeRadialMenu();
+            enterTargetingMode('rally', tower);
+          }
+        });
+      }
+
+      // Sell Button (70% refund)
+      const refund = Math.round(tower.investedGold * 0.70);
+      nodes.push({
+        angle: 110,
+        icon: '🪙',
+        label: `+${refund}g`,
+        title: 'Sell Tower (70%)',
+        desc: 'Demolish this tower and recover 70% of invested gold.',
+        stats: `Refund: +${refund} Gold`,
+        range: tower.range,
+        color: 'from-red-700 to-stone-900',
+        isSell: true,
+        onClick: () => sellTower(tower)
+      });
+
+      nodes.forEach(n => {
+        const rad = (n.angle * Math.PI) / 180;
+        const nx = 98 + Math.cos(rad) * 72;
+        const ny = 98 + Math.sin(rad) * 72;
+        const canAfford = n.cost === undefined || state.gold >= n.cost;
+
+        const btn = document.createElement('button');
+        btn.className = `radial-node absolute w-14 h-14 -ml-7 -mt-7 rounded-full bg-gradient-to-b ${n.color} border-2 ${canAfford ? 'border-amber-300' : 'border-red-500 opacity-75'} flex flex-col items-center justify-center`;
+        btn.style.left = `${nx}px`;
+        btn.style.top = `${ny}px`;
+        btn.innerHTML = `
+          <span class="text-xl leading-none">${n.icon}</span>
+          <span class="text-[10px] font-black px-1 rounded bg-black/75 ${canAfford ? 'text-yellow-300' : 'text-red-400'} mt-0.5">${n.cost !== undefined ? n.cost + 'g' : n.label}</span>
+        `;
+
+        btn.addEventListener('mouseenter', () => {
+          state.previewRange = { x: tower.x, y: tower.y, r: n.range, color: 'rgba(56, 189, 248, 0.3)' };
+          showRadialTooltip(n.title, n.desc, n.stats);
+        });
+        btn.addEventListener('mouseleave', () => {
+          state.previewRange = null;
+          hideRadialTooltip();
+        });
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          n.onClick();
+        });
+
+        radialNodesEl.appendChild(btn);
+      });
+
+      radialMenuEl.classList.remove('opacity-0', 'scale-75');
+      radialMenuEl.classList.add('active', 'opacity-100', 'scale-100');
+      updateInspector();
+    }
+
+    function positionRadialMenu(logicalX, logicalY) {
+      // Keep radial menu clamped comfortably inside screen bounds
+      const clampedX = Math.max(115, Math.min(LOGICAL_WIDTH - 115, logicalX));
+      const clampedY = Math.max(135, Math.min(LOGICAL_HEIGHT - 125, logicalY));
+      radialMenuEl.style.left = `${(clampedX / LOGICAL_WIDTH) * 100}%`;
+      radialMenuEl.style.top = `${(clampedY / LOGICAL_HEIGHT) * 100}%`;
+    }
+
+    function showRadialTooltip(title, desc, stats) {
+      document.getElementById('radial-tt-title').textContent = title;
+      document.getElementById('radial-tt-desc').textContent = desc;
+      document.getElementById('radial-tt-stats').textContent = stats;
+      radialTooltipEl.classList.remove('hidden');
+    }
+
+    function hideRadialTooltip() {
+      radialTooltipEl.classList.add('hidden');
+    }
+
+    function closeRadialMenu() {
+      radialMenuEl.classList.remove('active', 'opacity-100', 'scale-100');
+      radialMenuEl.classList.add('opacity-0', 'scale-75');
+      hideRadialTooltip();
+      state.selectedPad = null;
+      state.previewRange = null;
+    }
+
+    // =========================================================================
+    // 9. SPELLS, RALLY TARGETING & HERO COMMANDS
+    // =========================================================================
+    function enterTargetingMode(mode, rallyTower = null) {
+      closeRadialMenu();
+      state.targetingMode = mode;
+      state.rallyTower = rallyTower;
+      const banner = document.getElementById('targeting-banner');
+      const text = document.getElementById('targeting-text');
+      banner.classList.remove('hidden');
+
+      if (mode === 'fire') {
+        text.textContent = '☄️ Click anywhere on the battlefield to unleash RAIN OF FIRE!';
+      } else if (mode === 'reinf') {
+        text.textContent = '🛡️ Click on the road to summon 2 ROYAL REINFORCEMENTS!';
+      } else if (mode === 'hero') {
+        text.textContent = '👑 Click on the battlefield to move SIR GERALD!';
+        state.selectedEntity = state.hero;
+      } else if (mode === 'rally') {
+        text.textContent = '🚩 Click within the blue circle to set the BARRACKS RALLY POINT!';
+      }
+      updateInspector();
+    }
+
+    function cancelTargetingMode() {
+      state.targetingMode = null;
+      state.rallyTower = null;
+      document.getElementById('targeting-banner').classList.add('hidden');
+    }
+
+    function castRainOfFire(tx, ty) {
+      state.spells.fire.cd = state.spells.fire.maxCd;
+      cancelTargetingMode();
+      sfx.play('boom');
+      addFloatingText(tx, ty - 25, 'RAIN OF FIRE!', '#f97316', 18);
+
+      // Spawn 6 staggered meteors falling from top-left sky into target zone
+      for (let i = 0; i < 6; i++) {
+        const ox = tx + (Math.random() - 0.5) * 95;
+        const oy = ty + (Math.random() - 0.5) * 75;
+        state.projectiles.push({
+          type: 'meteor',
+          x: ox - 180,
+          y: oy - 360,
+          targetX: ox,
+          targetY: oy,
+          speed: 620,
+          delay: i * 0.14,
+          dmg: 115,
+          splash: 85
+        });
+      }
+    }
+
+    function castReinforcements(tx, ty) {
+      state.spells.reinf.cd = state.spells.reinf.maxCd;
+      cancelTargetingMode();
+      sfx.play('horn');
+      addFloatingText(tx, ty - 22, 'FOR THE KING!', '#38bdf8', 16);
+      spawnBurstParticles(tx, ty, '#38bdf8', 14);
+
+      const waveScale = Math.max(0, state.waveIndex);
+      const hp = 145 + waveScale * 18;
+      const dmgMin = 9 + waveScale * 2;
+      const dmgMax = 15 + waveScale * 3;
+
+      [-16, 16].forEach((dx, i) => {
+        state.soldiers.push({
+          id: 'reinf_' + Math.random().toString(36).slice(2, 8),
+          towerId: null,
+          isReinforcement: true,
+          lifeTimer: 20,
+          name: 'Royal Militia Warrior',
+          x: tx + dx,
+          y: ty,
+          homeX: tx + dx,
+          homeY: ty + (i === 0 ? -6 : 6),
+          hp,
+          maxHp: hp,
+          dmgMin,
+          dmgMax,
+          armor: 0.22,
+          dead: false,
+          engagedEnemy: null,
+          attackTimer: 0,
+          skillTimer: 2.5,
+          facing: 1
+        });
+      });
+    }
+
+    function commandHeroMove(tx, ty) {
+      const h = state.hero;
+      if (h.dead) return;
+      h.homeX = Math.max(40, Math.min(LOGICAL_WIDTH - 40, tx));
+      h.homeY = Math.max(50, Math.min(LOGICAL_HEIGHT - 50, ty));
+      h.movingToOrder = true; // Hero marches directly to destination without stopping prematurely!
+      h.targetEnemy = null;
+      // Release any currently blocked enemies so both Hero and Enemies move freely
+      for (const e of state.enemies) {
+        if (e.blockedBy === h) {
+          e.blockedBy = null;
+          e.inMeleeContact = false;
+        }
+      }
+      h.engagedEnemies = [];
+      cancelTargetingMode();
+      sfx.play('hero');
+      spawnBurstParticles(h.homeX, h.homeY, '#fde047', 12);
+      addFloatingText(h.homeX, h.homeY - 18, 'Moving Out!', '#fde047', 14);
+    }
+
+    function setBarracksRallyPoint(tower, tx, ty) {
+      const dist = Math.hypot(tx - tower.x, ty - tower.y);
+      let rx = tx;
+      let ry = ty;
+      if (dist > tower.range) {
+        const angle = Math.atan2(ty - tower.y, tx - tower.x);
+        rx = tower.x + Math.cos(angle) * (tower.range - 8);
+        ry = tower.y + Math.sin(angle) * (tower.range - 8);
+      }
+      tower.rallyX = rx;
+      tower.rallyY = ry;
+
+      // Update soldiers' home positions and release enemies so nothing freezes in place
+      for (const s of state.soldiers) {
+        if (s.towerId === tower.id) {
+          s.homeX = rx + s.offsetX;
+          s.homeY = ry + s.offsetY;
+          s.movingToRally = true;
+          if (s.engagedEnemy) {
+            if (s.engagedEnemy.blockedBy === s) {
+              s.engagedEnemy.blockedBy = null;
+              s.engagedEnemy.inMeleeContact = false;
+            }
+            s.engagedEnemy = null;
+          }
+        }
+      }
+
+      cancelTargetingMode();
+      sfx.play('horn');
+      spawnBurstParticles(rx, ry, '#38bdf8', 10);
+      addFloatingText(rx, ry - 15, 'Rally Point Set!', '#38bdf8', 14);
+    }
+
+    // =========================================================================
+    // 10. MAIN GAME UPDATE LOOP (PHYSICS, COMBAT, AI, SPAWNERS)
+    // =========================================================================
+    function updateGame(dt) {
+      if (state.paused || state.gameOver) return;
+      const effDt = dt * state.gameSpeed;
+      state.time += effDt;
+
+      // 1. Update Spell Cooldowns
+      for (const k of ['fire', 'reinf']) {
+        if (state.spells[k].cd > 0) {
+          state.spells[k].cd = Math.max(0, state.spells[k].cd - effDt);
+        }
+      }
+      updateSpellHUD();
+
+      // 2. Process Active Wave Enemy Spawners
+      if (state.activeSpawners.length > 0) {
+        for (let i = state.activeSpawners.length - 1; i >= 0; i--) {
+          const sp = state.activeSpawners[i];
+          sp.timer -= effDt;
+          if (sp.timer <= 0) {
+            spawnEnemy(sp.type, sp.pathIndex);
+            sp.remaining--;
+            sp.timer = sp.interval;
+            if (sp.remaining <= 0) {
+              state.activeSpawners.splice(i, 1);
+            }
+          }
+        }
+      } else if (state.waveActive && state.enemies.length === 0) {
+        // Current wave cleared!
+        state.waveActive = false;
+        if (state.waveIndex + 1 >= state.maxWaves && !state.endlessMode) {
+          triggerGameOver(true);
+          return;
+        } else {
+          state.nextWaveCountdown = state.nextWaveMaxTimer;
+          updateSkullMarkerUI();
+        }
+      }
+
+      // 3. Automatic Next Wave Countdown
+      if (!state.waveActive && state.waveIndex >= 0 && state.nextWaveCountdown > 0) {
+        state.nextWaveCountdown -= effDt;
+        updateSkullMarkerUI();
+        if (state.nextWaveCountdown <= 0) {
+          callNextWave(false);
+        }
+      }
+
+      // 4. Update Hero Sir Gerald
+      updateHero(effDt);
+
+      // 5. Update Barracks Soldiers, Skeletons & Reinforcements
+      updateSoldiers(effDt);
+
+      // 6. Update Enemies (Movement, Melee Combat, Regeneration, Shaman Heal)
+      updateEnemies(effDt);
+
+      // 7. Update Towers (Targeting & Firing)
+      updateTowers(effDt);
+
+      // 8. Update Projectiles
+      updateProjectiles(effDt);
+
+      // 9. Update Scorched Earth Zones
+      for (let i = state.scorchedZones.length - 1; i >= 0; i--) {
+        const sz = state.scorchedZones[i];
+        sz.life -= effDt;
+        sz.tick -= effDt;
+        if (sz.tick <= 0) {
+          sz.tick = 0.35;
+          for (const e of state.enemies) {
+            if (!e.flying && Math.hypot(e.x - sz.x, e.y - sz.y) <= sz.r) {
+              damageEnemy(e, 9, 'true');
+            }
+          }
+        }
+        if (sz.life <= 0) state.scorchedZones.splice(i, 1);
+      }
+
+      // 10. Update Particles, Floating Text & Comic Popups
+      for (let i = state.particles.length - 1; i >= 0; i--) {
+        const p = state.particles[i];
+        p.x += p.vx * effDt;
+        p.y += p.vy * effDt;
+        p.life -= effDt;
+        if (p.life <= 0) state.particles.splice(i, 1);
+      }
+      for (let i = state.floatingTexts.length - 1; i >= 0; i--) {
+        const ft = state.floatingTexts[i];
+        ft.y -= 28 * effDt;
+        ft.life -= effDt;
+        if (ft.life <= 0) state.floatingTexts.splice(i, 1);
+      }
+      for (let i = state.comicPopups.length - 1; i >= 0; i--) {
+        const cp = state.comicPopups[i];
+        cp.life -= effDt;
+        cp.scale = Math.min(1.15, cp.scale + effDt * 4.5);
+        if (cp.life <= 0) state.comicPopups.splice(i, 1);
+      }
+
+      updateHeroHUD();
+      updateInspectorLiveValues();
+    }
+
+    // =========================================================================
+    // 11. HERO, SOLDIER, ENEMY & TOWER LOGIC
+    // =========================================================================
+    function updateHero(dt) {
+      const h = state.hero;
+      if (h.swingAnim > 0) h.swingAnim = Math.max(0, h.swingAnim - dt * 3.8);
+      if (h.hitFlash > 0) h.hitFlash = Math.max(0, h.hitFlash - dt * 4);
+
+      if (h.dead) {
+        h.respawnTimer -= dt;
+        if (h.respawnTimer <= 0) {
+          h.dead = false;
+          h.hp = h.maxHp;
+          h.x = h.homeX;
+          h.y = h.homeY;
+          h.movingToOrder = false;
+          sfx.play('hero');
+          spawnBurstParticles(h.x, h.y, '#fde047', 18);
+          addFloatingText(h.x, h.y - 20, 'SIR GERALD RETURNED!', '#fde047', 15);
+        }
+        return;
+      }
+
+      // 1. If player issued a Move Order, Sir Gerald marches all the way to (homeX, homeY) without stopping!
+      if (h.movingToOrder) {
+        const distToPost = Math.hypot(h.homeX - h.x, h.homeY - h.y);
+        if (distToPost > 6) {
+          h.x += ((h.homeX - h.x) / distToPost) * (h.speed * 1.15) * dt;
+          h.y += ((h.homeY - h.y) / distToPost) * (h.speed * 1.15) * dt;
+          h.facing = h.homeX >= h.x ? 1 : -1;
+          h.walkCycle += dt * 12;
+          return;
+        } else {
+          h.movingToOrder = false;
+        }
+      }
+
+      // 2. Clean up dead or out-of-leash engaged enemies
+      h.engagedEnemies = h.engagedEnemies.filter(e => {
+        if (e.hp <= 0 || Math.hypot(e.x - h.homeX, e.y - h.homeY) > 125) {
+          if (e.blockedBy === h) {
+            e.blockedBy = null;
+            e.inMeleeContact = false;
+          }
+          return false;
+        }
+        return true;
+      });
+
+      // 3. Acquire nearby ground enemies around Sir Gerald's current location (without freezing them from afar!)
+      if (h.engagedEnemies.length < 2) {
+        for (const e of state.enemies) {
+          if (
+            !e.flying &&
+            (!e.blockedBy || e.blockedBy === h) &&
+            !h.engagedEnemies.includes(e) &&
+            Math.hypot(e.x - h.x, e.y - h.y) < 82 &&
+            Math.hypot(e.x - h.homeX, e.y - h.homeY) < 110
+          ) {
+            e.blockedBy = h;
+            // IMPORTANT: e.inMeleeContact stays FALSE until Sir Gerald physically reaches the enemy!
+            h.engagedEnemies.push(e);
+            if (h.engagedEnemies.length >= 2) break;
+          }
+        }
+      }
+
+      if (h.engagedEnemies.length > 0) {
+        h.outOfCombatTimer = 3.5; // Wait 3.5s after combat before regenerating health
+        const target = h.engagedEnemies[0];
+        const destX = target.x - (target.facing >= 0 ? 18 : -18);
+        const destY = target.y;
+        const dist = Math.hypot(destX - h.x, destY - h.y);
+
+        if (dist > 10) {
+          // Chase the moving enemy smoothly!
+          h.x += ((destX - h.x) / dist) * h.speed * dt;
+          h.y += ((destY - h.y) / dist) * h.speed * dt;
+          h.facing = target.x >= h.x ? 1 : -1;
+          h.walkCycle += dt * 11;
+          // Only lock enemy in place once Sir Gerald is within physical melee contact range
+          for (const eng of h.engagedEnemies) {
+            eng.inMeleeContact = Math.hypot(eng.x - h.x, eng.y - h.y) <= 30;
+          }
+        } else {
+          // In melee range: lock blades and swing sword!
+          for (const eng of h.engagedEnemies) {
+            eng.inMeleeContact = Math.hypot(eng.x - h.x, eng.y - h.y) <= 34;
+          }
+          h.facing = target.x >= h.x ? 1 : -1;
+          h.attackTimer -= dt;
+          h.skillTimer += dt;
+
+          const smiteCd = state.tech.hero_training ? 5.0 : 7.0;
+          if (h.skillTimer >= smiteCd) {
+            h.skillTimer = 0;
+            h.swingAnim = 1.0;
+            sfx.play('hero');
+            spawnBurstParticles(target.x, target.y, '#fde047', 20);
+            addComicPopup(target.x, target.y - 28, 'SMITE!', '#fef08a', '#b45309');
+            h.hp = Math.min(h.maxHp, h.hp + Math.round(h.maxHp * 0.15));
+            for (const e of state.enemies) {
+              if (Math.hypot(e.x - target.x, e.y - target.y) < 82) {
+                damageEnemy(e, h.dmgMax * 2.2, 'true', true);
+              }
+            }
+          } else if (h.attackTimer <= 0) {
+            h.attackTimer = 0.80;
+            h.swingAnim = 1.0; // Trigger visible sword swing animation!
+            sfx.play('sword');
+            const dmg = randInt(h.dmgMin, h.dmgMax);
+            damageEnemy(target, dmg, 'physical', true);
+          }
+        }
+      } else {
+        // Walk back to home post; only regenerate HP after outOfCombatTimer expires
+        h.outOfCombatTimer = Math.max(0, h.outOfCombatTimer - dt);
+        const dist = Math.hypot(h.homeX - h.x, h.homeY - h.y);
+        if (dist > 4) {
+          h.x += ((h.homeX - h.x) / dist) * h.speed * dt;
+          h.y += ((h.homeY - h.y) / dist) * h.speed * dt;
+          h.facing = h.homeX >= h.x ? 1 : -1;
+          h.walkCycle += dt * 9;
+        } else if (h.hp < h.maxHp && h.outOfCombatTimer <= 0) {
+          h.hp = Math.min(h.maxHp, h.hp + h.maxHp * 0.08 * dt);
+        }
+      }
+    }
+
+    function grantHeroXp(amount) {
+      const h = state.hero;
+      if (h.level >= 10) return;
+      h.xp += amount;
+      if (h.xp >= h.xpNext) {
+        h.xp -= h.xpNext;
+        h.level++;
+        h.xpNext = Math.round(h.xpNext * 1.35);
+        h.maxHp += 55;
+        h.hp = h.maxHp;
+        h.dmgMin += 5;
+        h.dmgMax += 8;
+        h.armor = Math.min(0.65, h.armor + 0.03);
+        sfx.play('hero');
+        spawnBurstParticles(h.x, h.y, '#fde047', 22);
+        addFloatingText(h.x, h.y - 30, `HERO LEVEL ${h.level}!`, '#fde047', 16);
+      }
+    }
+
+    function updateSoldiers(dt) {
+      for (let i = state.soldiers.length - 1; i >= 0; i--) {
+        const s = state.soldiers[i];
+        if (s.swingAnim > 0) s.swingAnim = Math.max(0, s.swingAnim - dt * 3.8);
+
+        // Temporary Reinforcement Lifetime
+        if (s.isReinforcement) {
+          s.lifeTimer -= dt;
+          if (s.lifeTimer <= 0 || s.dead) {
+            if (s.engagedEnemy && s.engagedEnemy.blockedBy === s) {
+              s.engagedEnemy.blockedBy = null;
+              s.engagedEnemy.inMeleeContact = false;
+            }
+            state.soldiers.splice(i, 1);
+            continue;
+          }
+        }
+
+        // Respawn timer for dead Barracks Soldiers
+        if (s.dead) {
+          s.respawnTimer -= dt;
+          if (s.respawnTimer <= 0) {
+            s.dead = false;
+            s.hp = s.maxHp;
+            const parentTower = state.towers.find(t => t.id === s.towerId);
+            s.x = parentTower ? parentTower.x : s.homeX;
+            s.y = parentTower ? parentTower.y : s.homeY;
+            s.movingToRally = true;
+            spawnBurstParticles(s.x, s.y, s.isSkeleton ? '#4ade80' : '#60a5fa', 8);
+          }
+          continue;
+        }
+
+        // If soldier was ordered to a new Rally Point, walk there first without freezing enemies from afar
+        if (s.movingToRally) {
+          const distRally = Math.hypot(s.homeX - s.x, s.homeY - s.y);
+          if (distRally > 6) {
+            s.x += ((s.homeX - s.x) / distRally) * 110 * dt;
+            s.y += ((s.homeY - s.y) / distRally) * 110 * dt;
+            s.facing = s.homeX >= s.x ? 1 : -1;
+            s.walkCycle = (s.walkCycle || 0) + dt * 11;
+            continue;
+          } else {
+            s.movingToRally = false;
+          }
+        }
+
+        // Clear dead or out-of-leash engaged enemy
+        if (s.engagedEnemy && (s.engagedEnemy.hp <= 0 || s.engagedEnemy.blockedBy !== s || Math.hypot(s.engagedEnemy.x - s.homeX, s.engagedEnemy.y - s.homeY) > 105)) {
+          if (s.engagedEnemy.blockedBy === s) {
+            s.engagedEnemy.blockedBy = null;
+            s.engagedEnemy.inMeleeContact = false;
+          }
+          s.engagedEnemy = null;
+        }
+
+        // Intercept nearby unblocked ground enemies near the soldier's current position
+        if (!s.engagedEnemy) {
+          for (const e of state.enemies) {
+            if (!e.flying && !e.blockedBy && Math.hypot(e.x - s.x, e.y - s.y) < 68 && Math.hypot(e.x - s.homeX, e.y - s.homeY) < 92) {
+              e.blockedBy = s;
+              e.inMeleeContact = false;
+              s.engagedEnemy = e;
+              break;
+            }
+          }
+        }
+
+        // Paladin Holy Light Self/Ally Heal Aura
+        if (s.spec === 'paladins') {
+          s.skillTimer -= dt;
+          if (s.skillTimer <= 0 && s.hp < s.maxHp * 0.82) {
+            s.skillTimer = 6.0;
+            for (const ally of state.soldiers) {
+              if (!ally.dead && Math.hypot(ally.x - s.x, ally.y - s.y) <= 75) {
+                ally.hp = Math.min(ally.maxHp, ally.hp + 95);
+                spawnBurstParticles(ally.x, ally.y, '#fde047', 8);
+              }
+            }
+            addFloatingText(s.x, s.y - 16, '+Holy Light Aura', '#4ade80', 12);
+          }
+        }
+
+        if (s.engagedEnemy) {
+          const e = s.engagedEnemy;
+          const destX = e.x - 14;
+          const destY = e.y;
+          const dist = Math.hypot(destX - s.x, destY - s.y);
+          if (dist > 8) {
+            s.x += ((destX - s.x) / dist) * 105 * dt;
+            s.y += ((destY - s.y) / dist) * 105 * dt;
+            s.facing = destX >= s.x ? 1 : -1;
+            s.walkCycle = (s.walkCycle || 0) + dt * 11;
+            e.inMeleeContact = Math.hypot(e.x - s.x, e.y - s.y) <= 28;
+          } else {
+            e.inMeleeContact = true;
+            s.facing = e.x >= s.x ? 1 : -1;
+            s.attackTimer -= dt;
+            if (s.attackTimer <= 0) {
+              s.attackTimer = 0.90;
+              s.swingAnim = 1.0; // Trigger weapon swing animation
+              sfx.play('sword');
+              const dmg = randInt(s.dmgMin, s.dmgMax);
+
+              if (s.spec === 'paladins' && Math.random() < 0.25) {
+                e.stunTimer = 1.4;
+                damageEnemy(e, dmg + 18, 'true');
+                addComicPopup(e.x, e.y - 22, 'POW!', '#fef08a', '#1d4ed8');
+              } else if (s.spec === 'barbarians' && Math.random() < 0.30) {
+                addComicPopup(s.x, s.y - 24, 'POW!', '#fca5a5', '#991b1b');
+                spawnBurstParticles(s.x, s.y, '#ef4444', 10);
+                for (const foe of state.enemies) {
+                  if (!foe.flying && Math.hypot(foe.x - s.x, foe.y - s.y) <= 58) {
+                    damageEnemy(foe, dmg * 1.35, 'physical');
+                  }
+                }
+              } else {
+                damageEnemy(e, dmg, 'physical');
+              }
+            }
+          }
+        } else {
+          // Return to Rally Point & Regenerate HP; Barbarians & Reinforcements can throw axes/spears at nearby foes!
+          const dist = Math.hypot(s.homeX - s.x, s.homeY - s.y);
+          if (dist > 4) {
+            s.x += ((s.homeX - s.x) / dist) * 95 * dt;
+            s.y += ((s.homeY - s.y) / dist) * 95 * dt;
+            s.facing = s.homeX >= s.x ? 1 : -1;
+            s.walkCycle = (s.walkCycle || 0) + dt * 9;
+          } else {
+            if (s.hp < s.maxHp) {
+              s.hp = Math.min(s.maxHp, s.hp + s.maxHp * 0.08 * dt);
+            }
+            if (s.spec === 'barbarians' || s.isReinforcement) {
+              s.attackTimer -= dt;
+              if (s.attackTimer <= 0) {
+                const rangedTarget = state.enemies.find(e => Math.hypot(e.x - s.x, e.y - s.y) < 135);
+                if (rangedTarget) {
+                  s.attackTimer = 1.25;
+                  s.swingAnim = 1.0;
+                  state.projectiles.push({
+                    type: 'axe',
+                    x: s.x,
+                    y: s.y - 8,
+                    target: rangedTarget,
+                    speed: 340,
+                    dmg: randInt(s.dmgMin, s.dmgMax),
+                    dmgType: 'physical'
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    function updateEnemies(dt) {
+      for (let i = state.enemies.length - 1; i >= 0; i--) {
+        const e = state.enemies[i];
+        if (e.swingAnim > 0) e.swingAnim = Math.max(0, e.swingAnim - dt * 3.6);
+
+        // Forest Troll & Boss Health Regeneration
+        if (e.regen > 0 && e.hp > 0 && e.hp < e.maxHp) {
+          e.hp = Math.min(e.maxHp, e.hp + e.regen * dt);
+        }
+
+        // Poison Damage over Time (Rangers / Plague)
+        if (e.poisonTimer > 0) {
+          e.poisonTimer -= dt;
+          e.hp -= e.poisonDps * dt;
+        }
+        // Sorcerer Curse Timer
+        if (e.curseTimer > 0) {
+          e.curseTimer -= dt;
+          e.hp -= 12 * dt;
+        }
+
+        if (e.hp <= 0) {
+          killEnemy(e, i);
+          continue;
+        }
+
+        // Stunned by Paladin Shield Bash or Solar Nova
+        if (e.stunTimer > 0) {
+          e.stunTimer -= dt;
+          continue;
+        }
+
+        // Dark Shaman Ancestral Heal Aura
+        if (e.healer) {
+          e.healTimer -= dt;
+          if (e.healTimer <= 0) {
+            e.healTimer = 3.6;
+            let healedAny = false;
+            for (const ally of state.enemies) {
+              if (!ally.flying && ally.hp < ally.maxHp && Math.hypot(ally.x - e.x, ally.y - e.y) <= 95) {
+                ally.hp = Math.min(ally.maxHp, ally.hp + 48);
+                healedAny = true;
+                spawnBurstParticles(ally.x, ally.y, '#4ade80', 5);
+              }
+            }
+            if (healedAny) {
+              e.swingAnim = 1.0;
+              addFloatingText(e.x, e.y - 18, '+Ancestral Heal', '#4ade80', 12);
+            }
+          }
+        }
+
+        // Validate blocker status: Enemy ONLY stops moving when physically within melee range (<= 30px) of the blocker!
+        if (e.blockedBy && (e.blockedBy.dead || e.blockedBy.hp <= 0)) {
+          e.blockedBy = null;
+          e.inMeleeContact = false;
+        }
+
+        const distToBlocker = e.blockedBy ? Math.hypot(e.x - e.blockedBy.x, e.y - e.blockedBy.y) : Infinity;
+        const activelyClashing = e.blockedBy && (e.inMeleeContact || distToBlocker <= 30);
+
+        if (activelyClashing) {
+          e.inMeleeContact = true;
+          const blocker = e.blockedBy;
+          e.facing = blocker.x >= e.x ? 1 : -1;
+          e.attackTimer -= dt;
+          if (e.attackTimer <= 0) {
+            e.attackTimer = 1.0;
+            e.swingAnim = 1.0; // Enemy visibly swings weapon!
+            const rawDmg = e.dmg;
+            const reduced = Math.max(2, Math.round(rawDmg * (1 - (blocker.armor || 0))));
+            blocker.hp -= reduced;
+            if (blocker.id === 'hero') {
+              blocker.hitFlash = 1.0;
+              blocker.outOfCombatTimer = 3.5;
+              addFloatingText(blocker.x + (Math.random() - 0.5) * 14, blocker.y - 26, `-${reduced}`, '#f87171', 13);
+            }
+            spawnBurstParticles(blocker.x, blocker.y - 8, '#ef4444', 5);
+
+            if (blocker.hp <= 0) {
+              blocker.dead = true;
+              blocker.hp = 0;
+              e.blockedBy = null;
+              e.inMeleeContact = false;
+              if (blocker.id === 'hero') {
+                blocker.respawnTimer = 12;
+                addFloatingText(blocker.x, blocker.y - 16, 'Sir Gerald Defeated!', '#ef4444', 14);
+              } else {
+                blocker.respawnTimer = blocker.respawnTime || 8;
+              }
+            }
+          }
+        } else {
+          // Advance along path waypoints smoothly!
+          e.walkCycle += dt * 8;
+          const path = PATHS[e.pathIndex] || PATHS[0];
+          const wp = path[e.waypointIndex];
+          if (!wp) {
+            state.lives = Math.max(0, state.lives - e.livesCost);
+            addFloatingText(1180, 360, `-${e.livesCost} ❤️`, '#ef4444', 18);
+            state.enemies.splice(i, 1);
+            updateTopHUD();
+            if (state.lives <= 0) {
+              triggerGameOver(false);
+              return;
+            }
+            continue;
+          }
+
+          const dx = wp.x - e.x;
+          const dy = wp.y - e.y;
+          const dist = Math.hypot(dx, dy);
+          e.facing = dx >= 0 ? 1 : -1;
+
+          if (dist <= e.speed * dt) {
+            e.x = wp.x;
+            e.y = wp.y;
+            e.waypointIndex++;
+          } else {
+            e.x += (dx / dist) * e.speed * dt;
+            e.y += (dy / dist) * e.speed * dt;
+          }
+        }
+      }
+    }
+
+    function damageEnemy(e, amount, dmgType, fromHero = false) {
+      let mult = 1;
+      if (dmgType === 'physical') {
+        const effArmor = e.curseTimer > 0 ? e.armor * 0.5 : e.armor;
+        mult = 1 - effArmor;
+      } else if (dmgType === 'magic') {
+        mult = 1 - e.magicRes;
+      }
+      const finalDmg = Math.max(1, Math.round(amount * mult));
+      e.hp -= finalDmg;
+      if (fromHero) grantHeroXp(Math.round(finalDmg * 0.45));
+    }
+
+    function killEnemy(e, index) {
+      if (e.blockedBy) {
+        if (e.blockedBy.engagedEnemy === e) e.blockedBy.engagedEnemy = null;
+        e.blockedBy = null;
+      }
+      state.gold += e.gold;
+      state.kills++;
+      grantHeroXp(14);
+      spawnBurstParticles(e.x, e.y, e.flying ? '#f43f5e' : '#84cc16', 12);
+      addFloatingText(e.x, e.y - 12, `+${e.gold}g`, '#fde047', 12);
+
+      if (state.selectedEntity === e) {
+        state.selectedEntity = null;
+        updateInspector();
+      }
+      state.enemies.splice(index, 1);
+      updateTopHUD();
+    }
+
+    function updateTowers(dt) {
+      for (const t of state.towers) {
+        if (t.recoil > 0) t.recoil = Math.max(0, t.recoil - dt * 4);
+        if (t.beamTimer > 0) t.beamTimer = Math.max(0, t.beamTimer - dt);
+        if (t.type === 'barracks') continue;
+
+        // Check if boosted by a nearby Sunforge Obelisk Haste Aura!
+        let hasteMult = 1;
+        for (const other of state.towers) {
+          if (other !== t && other.type === 'sunforge' && Math.hypot(other.x - t.x, other.y - t.y) <= 175) {
+            hasteMult = Math.max(hasteMult, other.tier >= 5 ? 1.35 : other.tier === 4 ? 1.25 : 1.15);
+          }
+        }
+
+        t.cooldown -= dt * hasteMult;
+        t.specialCooldown -= dt;
+        if (t.cooldown > 0) continue;
+
+        const canHitFlying = t.type !== 'artillery' || t.spec === 'tesla';
+        const candidates = state.enemies.filter(e => {
+          if (e.flying && !canHitFlying) return false;
+          return Math.hypot(e.x - t.x, e.y - t.y) <= t.range;
+        });
+
+        if (candidates.length === 0) continue;
+
+        candidates.sort((a, b) => b.waypointIndex - a.waypointIndex);
+        const target = candidates[0];
+        t.aimAngle = Math.atan2(target.y - t.y, target.x - t.x);
+        t.recoil = 1.0;
+        t.cooldown = t.rate;
+        t.shotCounter++;
+
+        // Specializations & Tower Firing Behavior
+        if (t.type === 'archer') {
+          sfx.play('arrow');
+          const isSnipe = t.spec === 'musketeers' && t.shotCounter % (t.tier >= 5 ? 3 : 4) === 0;
+          const baseDmg = randInt(t.dmgMin, t.dmgMax);
+          state.projectiles.push({
+            type: isSnipe ? 'bullet' : 'arrow',
+            x: t.x,
+            y: t.y - 18,
+            target,
+            speed: isSnipe ? 760 : 480,
+            dmg: isSnipe ? baseDmg * 2.8 : baseDmg,
+            dmgType: 'physical',
+            poison: t.spec === 'rangers',
+            snipe: isSnipe,
+            mythic: t.tier >= 5
+          });
+          // Mythic Rangers fire a second arrow at another target!
+          if (t.spec === 'rangers' && t.tier >= 5 && candidates.length > 1) {
+            state.projectiles.push({
+              type: 'arrow',
+              x: t.x,
+              y: t.y - 18,
+              target: candidates[1],
+              speed: 480,
+              dmg: baseDmg,
+              dmgType: 'physical',
+              poison: true
+            });
+          }
+        } else if (t.type === 'mage') {
+          sfx.play('mage');
+          if (t.spec === 'arcane' && t.specialCooldown <= 0) {
+            t.specialCooldown = t.tier >= 5 ? 5.2 : 7.5;
+            if (t.shotCounter % 2 === 0 && !target.boss && target.waypointIndex > 1) {
+              const path = PATHS[target.pathIndex] || PATHS[0];
+              const newWp = Math.max(1, target.waypointIndex - 2);
+              const prevPt = path[newWp - 1];
+              spawnBurstParticles(target.x, target.y, '#a855f7', 16);
+              target.waypointIndex = newWp;
+              target.x = prevPt.x + (Math.random() - 0.5) * 14;
+              target.y = prevPt.y + (Math.random() - 0.5) * 14;
+              if (target.blockedBy) {
+                if (target.blockedBy.engagedEnemy === target) target.blockedBy.engagedEnemy = null;
+                target.blockedBy = null;
+                target.inMeleeContact = false;
+              }
+              spawnBurstParticles(target.x, target.y, '#c084fc', 16);
+              addComicPopup(target.x, target.y - 24, 'TELEPORT!', '#f3e8ff', '#6b21a8');
+            } else {
+              damageEnemy(target, t.tier >= 5 ? 620 : 350, 'true');
+              spawnBeamParticles(t.x, t.y - 22, target.x, target.y, '#c084fc');
+              addComicPopup(target.x, target.y - 24, 'ZAP!', '#f3e8ff', '#7e22ce');
+            }
+          } else {
+            const boltCount = t.spec === 'sorcerer' ? (t.tier >= 5 ? 4 : 2) : 1;
+            for (let b = 0; b < boltCount; b++) {
+              const bTarget = candidates[b % candidates.length];
+              state.projectiles.push({
+                type: 'bolt',
+                x: t.x + (b - 0.5) * 6,
+                y: t.y - 20,
+                target: bTarget,
+                speed: 410,
+                dmg: randInt(t.dmgMin, t.dmgMax),
+                dmgType: 'magic',
+                curse: t.spec === 'sorcerer'
+              });
+            }
+          }
+        } else if (t.type === 'artillery') {
+          if (t.spec === 'tesla') {
+            sfx.play('tesla');
+            const maxArcs = t.tier >= 5 ? 9 : 5;
+            const hitTargets = candidates.slice(0, maxArcs);
+            let prevX = t.x;
+            let prevY = t.y - 22;
+            hitTargets.forEach((ht, idx) => {
+              damageEnemy(ht, randInt(t.dmgMin, t.dmgMax), 'magic');
+              if (t.tier >= 5 && Math.random() < 0.25) ht.stunTimer = 0.6;
+              spawnBeamParticles(prevX, prevY, ht.x, ht.y, '#38bdf8');
+              if (idx === 0 && t.shotCounter % 3 === 0) {
+                addComicPopup(ht.x, ht.y - 24, 'ZAP!', '#e0f2fe', '#0284c7');
+              }
+              prevX = ht.x;
+              prevY = ht.y;
+            });
+          } else {
+            sfx.play('boom');
+            const isCluster = t.spec === 'bertha' && t.shotCounter % 2 === 0;
+            state.projectiles.push({
+              type: 'shell',
+              x: t.x,
+              y: t.y - 20,
+              startX: t.x,
+              startY: t.y - 20,
+              targetX: target.x,
+              targetY: target.y,
+              progress: 0,
+              duration: 0.55,
+              dmg: randInt(t.dmgMin, t.dmgMax) * (isCluster ? 1.45 : 1),
+              splash: t.splash,
+              cluster: isCluster
+            });
+          }
+        } else if (t.type === 'sunforge') {
+          // Continuous Solar True-Damage Beams!
+          sfx.play('mage');
+          const maxBeams = t.spec === 'helios' ? (t.tier >= 5 ? 3 : 2) : 1;
+          const hitTargets = candidates.slice(0, maxBeams);
+          t.beamTargets = hitTargets.map(ht => ({ x: ht.x, y: ht.y }));
+          t.beamTimer = 0.28;
+          hitTargets.forEach(ht => {
+            damageEnemy(ht, randInt(t.dmgMin, t.dmgMax), 'true');
+            spawnBurstParticles(ht.x, ht.y, '#fde047', 4);
+          });
+          if (t.spec === 'nova' && t.shotCounter % 4 === 0) {
+            addComicPopup(target.x, target.y - 24, 'SOLAR FLARE!', '#fef08a', '#ea580c');
+            for (const foe of candidates) {
+              foe.stunTimer = 1.1;
+              damageEnemy(foe, t.dmgMax * 0.8, 'true');
+            }
+          }
+        } else if (t.type === 'necro') {
+          sfx.play('mage');
+          const boltTargets = t.tier >= 5 ? candidates.slice(0, 3) : [target];
+          boltTargets.forEach(bt => {
+            state.projectiles.push({
+              type: 'bolt',
+              x: t.x,
+              y: t.y - 22,
+              target: bt,
+              speed: 390,
+              dmg: randInt(t.dmgMin, t.dmgMax),
+              dmgType: 'magic',
+              poison: t.spec === 'plague',
+              necro: true
+            });
+          });
+          // Heal Undead Skeletons belonging to this Necromancer Tower on Soul Harvest
+          if (t.spec === 'lich' && t.shotCounter % 3 === 0) {
+            for (const s of state.soldiers) {
+              if (s.towerId === t.id && !s.dead) {
+                s.hp = Math.min(s.maxHp, s.hp + 70);
+                spawnBurstParticles(s.x, s.y, '#4ade80', 6);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    function updateProjectiles(dt) {
+      for (let i = state.projectiles.length - 1; i >= 0; i--) {
+        const p = state.projectiles[i];
+
+        if (p.delay && p.delay > 0) {
+          p.delay -= dt;
+          continue;
+        }
+
+        if (p.type === 'shell') {
+          // Parabolic Artillery Arc
+          p.progress += dt / p.duration;
+          const t = Math.min(1, p.progress);
+          p.x = p.startX + (p.targetX - p.startX) * t;
+          p.y = p.startY + (p.targetY - p.startY) * t - Math.sin(t * Math.PI) * (p.bomblet ? 45 : 90);
+
+          if (t >= 1) {
+            sfx.play('boom');
+            spawnBurstParticles(p.targetX, p.targetY, '#f97316', p.bomblet ? 10 : 18);
+            for (const e of state.enemies) {
+              if (!e.flying && Math.hypot(e.x - p.targetX, e.y - p.targetY) <= p.splash) {
+                damageEnemy(e, p.dmg, 'physical');
+              }
+            }
+            if (p.cluster) {
+              addComicPopup(p.targetX, p.targetY - 24, 'POW!', '#ffedd5', '#c2410c');
+              state.scorchedZones.push({ x: p.targetX, y: p.targetY, r: 68, life: 4.5, tick: 0.4 });
+              // Spawn 3 scattering Cluster Bomblets around the impact zone!
+              for (let b = 0; b < 3; b++) {
+                const ang = (b * Math.PI * 2) / 3 + Math.random() * 0.5;
+                const bx = p.targetX + Math.cos(ang) * 52;
+                const by = p.targetY + Math.sin(ang) * 38;
+                state.projectiles.push({
+                  type: 'shell',
+                  bomblet: true,
+                  x: p.targetX,
+                  y: p.targetY,
+                  startX: p.targetX,
+                  startY: p.targetY,
+                  targetX: bx,
+                  targetY: by,
+                  progress: 0,
+                  duration: 0.32,
+                  dmg: Math.round(p.dmg * 0.45),
+                  splash: 55,
+                  cluster: false
+                });
+              }
+            }
+            state.projectiles.splice(i, 1);
+          }
+        } else if (p.type === 'meteor') {
+          const dx = p.targetX - p.x;
+          const dy = p.targetY - p.y;
+          const dist = Math.hypot(dx, dy);
+          spawnBurstParticles(p.x, p.y, '#fb923c', 2);
+          if (dist <= p.speed * dt) {
+            sfx.play('boom');
+            spawnBurstParticles(p.targetX, p.targetY, '#ef4444', 22);
+            state.scorchedZones.push({ x: p.targetX, y: p.targetY, r: 60, life: 5.0, tick: 0.4 });
+            for (const e of state.enemies) {
+              if (Math.hypot(e.x - p.targetX, e.y - p.targetY) <= p.splash) {
+                damageEnemy(e, p.dmg, 'true');
+              }
+            }
+            state.projectiles.splice(i, 1);
+          } else {
+            p.x += (dx / dist) * p.speed * dt;
+            p.y += (dy / dist) * p.speed * dt;
+          }
+        } else {
+          // Homing Projectiles (Arrow, Bullet, Arcane Bolt, Thrown Axe)
+          if (!p.target || p.target.hp <= 0) {
+            state.projectiles.splice(i, 1);
+            continue;
+          }
+          const dx = p.target.x - p.x;
+          const dy = p.target.y - p.y;
+          const dist = Math.hypot(dx, dy);
+          p.angle = Math.atan2(dy, dx);
+
+          if (dist <= p.speed * dt) {
+            // Musketeer Snipe has a 30% chance to Instant-Kill non-boss enemies, or deal massive crit!
+            if (p.snipe && !p.target.boss && Math.random() < 0.30) {
+              p.target.hp = 0;
+              addComicPopup(p.target.x, p.target.y - 26, 'SNIPE!', '#fef08a', '#dc2626');
+            } else {
+              damageEnemy(p.target, p.dmg, p.dmgType);
+              if (p.snipe) {
+                addComicPopup(p.target.x, p.target.y - 24, 'SNIPE!', '#fef08a', '#b45309');
+              }
+            }
+            if (p.poison) {
+              p.target.poisonTimer = 3.0;
+              p.target.poisonDps = 8;
+            }
+            if (p.curse) {
+              p.target.curseTimer = 5.0;
+            }
+            spawnBurstParticles(p.target.x, p.target.y, p.type === 'bolt' ? '#c084fc' : '#fde047', 5);
+            state.projectiles.splice(i, 1);
+          } else {
+            p.x += (dx / dist) * p.speed * dt;
+            p.y += (dy / dist) * p.speed * dt;
+          }
+        }
+      }
+    }
+
+    // =========================================================================
+    // 12. CANVAS RENDERING ENGINE
+    // =========================================================================
+    function renderGame() {
+      ctx.clearRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+
+      // 1. Draw Pre-Rendered Fantasy Landscape
+      ctx.drawImage(bgCanvas, 0, 0);
+
+      // 2. Draw Animated River Sparkles
+      ctx.save();
+      ctx.strokeStyle = 'rgba(186, 230, 253, 0.35)';
+      ctx.lineWidth = 3;
+      for (let i = 0; i < 9; i++) {
+        const offset = ((state.time * 28 + i * 85) % 720);
+        const rx = 700 + (offset / 720) * 175 + Math.sin(state.time * 2 + i) * 6;
+        const ry = offset;
+        if (Math.abs(ry - 335) > 42) {
+          ctx.beginPath();
+          ctx.moveTo(rx, ry);
+          ctx.lineTo(rx + 4, ry + 18);
+          ctx.stroke();
+        }
+      }
+      ctx.restore();
+
+      // 3. Draw Scorched Earth Craters
+      for (const sz of state.scorchedZones) {
+        ctx.save();
+        const alpha = Math.min(0.65, sz.life / 2);
+        ctx.fillStyle = `rgba(28, 25, 23, ${alpha})`;
+        ctx.beginPath();
+        ctx.ellipse(sz.x, sz.y, sz.r, sz.r * 0.68, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = `rgba(249, 115, 22, ${alpha})`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // 4. Draw Range Circle (Selected Tower or Radial Menu Preview)
+      if (state.previewRange) {
+        drawRangeCircle(state.previewRange.x, state.previewRange.y, state.previewRange.r, state.previewRange.color);
+      } else if (state.targetingMode === 'rally' && state.rallyTower) {
+        drawRangeCircle(state.rallyTower.x, state.rallyTower.y, state.rallyTower.range, 'rgba(56, 189, 248, 0.32)');
+      } else if (state.selectedEntity && state.selectedEntity.range) {
+        drawRangeCircle(state.selectedEntity.x, state.selectedEntity.y, state.selectedEntity.range, 'rgba(251, 191, 36, 0.25)');
+      }
+
+      // 5. Draw Strategic Build Pads & Towers
+      for (const pad of TOWER_PADS) {
+        const builtTower = state.towers.find(t => t.padId === pad.id);
+        if (!builtTower) {
+          drawEmptyPad(pad);
+        } else {
+          drawTower(builtTower);
+        }
+      }
+
+      // 6. Sort Ground Entities + Trees by Y-coordinate for authentic 2.5D depth
+      const renderables = [];
+      for (const tree of decorTrees) {
+        renderables.push({ kind: 'tree', y: tree.y, obj: tree });
+      }
+      for (const s of state.soldiers) {
+        if (!s.dead) renderables.push({ kind: 'soldier', y: s.y, obj: s });
+      }
+      if (!state.hero.dead) {
+        renderables.push({ kind: 'hero', y: state.hero.y, obj: state.hero });
+      }
+      for (const e of state.enemies) {
+        if (!e.flying) renderables.push({ kind: 'enemy', y: e.y, obj: e });
+      }
+
+      renderables.sort((a, b) => a.y - b.y);
+      for (const item of renderables) {
+        if (item.kind === 'tree') drawTree(item.obj);
+        else if (item.kind === 'soldier') drawSoldier(item.obj);
+        else if (item.kind === 'hero') drawHero(item.obj);
+        else if (item.kind === 'enemy') drawEnemy(item.obj);
+      }
+
+      // 7. Draw Flying Enemies (Above trees & ground forces with drop shadows)
+      for (const e of state.enemies) {
+        if (e.flying) drawEnemy(e);
+      }
+
+      // 8. Draw Animated Castle & Bridge Torches
+      for (const t of torches) {
+        ctx.fillStyle = '#44403c';
+        ctx.fillRect(t.x - 3, t.y, 6, 14);
+        const flicker = Math.sin(state.time * 16 + t.x) * 2.5;
+        ctx.fillStyle = '#f97316';
+        ctx.beginPath();
+        ctx.arc(t.x, t.y - 3, 7 + flicker * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath();
+        ctx.arc(t.x, t.y - 3, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 9. Draw Projectiles
+      drawProjectiles();
+
+      // 10. Draw Particles & Floating Combat Text
+      for (const p of state.particles) {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      for (const ft of state.floatingTexts) {
+        ctx.save();
+        ctx.font = `900 ${ft.size}px Nunito, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 3.5;
+        ctx.strokeText(ft.text, ft.x, ft.y);
+        ctx.fillStyle = ft.color;
+        ctx.fillText(ft.text, ft.x, ft.y);
+        ctx.restore();
+      }
+
+      // Draw Kingdom Rush Style Comic-Book Action Pop-ups ("POW!", "SNIPE!", "ZAP!", "SMITE!")
+      for (const cp of state.comicPopups) {
+        ctx.save();
+        ctx.translate(cp.x, cp.y);
+        ctx.scale(cp.scale, cp.scale);
+        ctx.rotate(cp.angle);
+
+        // Jagged starburst comic badge
+        ctx.fillStyle = cp.bg;
+        ctx.strokeStyle = '#1c1917';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        const spikes = 10;
+        for (let i = 0; i < spikes * 2; i++) {
+          const r = i % 2 === 0 ? 28 : 19;
+          const a = (i * Math.PI) / spikes;
+          const sx = Math.cos(a) * r * 1.35;
+          const sy = Math.sin(a) * r * 0.85;
+          if (i === 0) ctx.moveTo(sx, sy);
+          else ctx.lineTo(sx, sy);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.font = '900 13px Cinzel, serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 3;
+        ctx.strokeText(cp.text, 0, 1);
+        ctx.fillStyle = cp.fg;
+        ctx.fillText(cp.text, 0, 1);
+        ctx.restore();
+      }
+
+      // Draw Castle Gate Defense Shield Indicator
+      ctx.save();
+      ctx.translate(1222, 288);
+      ctx.fillStyle = 'rgba(28, 25, 23, 0.85)';
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(-34, -14, 68, 26, 8);
+      ctx.fill();
+      ctx.stroke();
+      ctx.font = '900 13px Nunito, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = state.lives > 10 ? '#fde68a' : '#f87171';
+      ctx.fillText(`🛡️ ${state.lives}`, 0, -1);
+      ctx.restore();
+
+      // 11. Draw Interactive Targeting Reticle (when casting Spells / moving Hero / Rally)
+      if (state.targetingMode) {
+        const mx = state.mousePos.x;
+        const my = state.mousePos.y;
+        ctx.save();
+        if (state.targetingMode === 'fire') {
+          ctx.fillStyle = 'rgba(239, 68, 68, 0.25)';
+          ctx.strokeStyle = '#f97316';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(mx, my, 85, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        } else {
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(mx, my, 24, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+    }
+
+    function drawRangeCircle(x, y, r, fill) {
+      ctx.save();
+      ctx.fillStyle = fill;
+      ctx.strokeStyle = '#fde047';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([8, 6]);
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawEmptyPad(pad) {
+      const isSelected = state.selectedPad && state.selectedPad.id === pad.id;
+      ctx.save();
+      ctx.translate(pad.x, pad.y);
+      // Stone foundation shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.4)';
+      ctx.beginPath();
+      ctx.ellipse(0, 4, 34, 23, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Stone border
+      ctx.fillStyle = isSelected ? '#ca8a04' : '#78716c';
+      ctx.strokeStyle = isSelected ? '#fef08a' : '#292524';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 32, 21, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Inner earth pad
+      ctx.fillStyle = '#57534e';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 24, 15, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Golden Hammer/Sign Emblem
+      ctx.fillStyle = '#fde68a';
+      ctx.font = 'bold 15px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🔨', 0, 0);
+      ctx.restore();
+    }
+
+    function drawTower(t) {
+      const isSelected = state.selectedEntity === t;
+      ctx.save();
+      ctx.translate(t.x, t.y);
+
+      // Mythic Tier-5 Glowing Ground Rune Halo
+      if (t.tier >= 5) {
+        ctx.save();
+        ctx.rotate(state.time * 1.2);
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 2.5;
+        ctx.setLineDash([8, 6]);
+        ctx.beginPath();
+        ctx.arc(0, 2, 39, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Selection ring
+      if (isSelected) {
+        ctx.strokeStyle = '#fde047';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.ellipse(0, 4, 38, 25, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Base shadow & stone platform
+      ctx.fillStyle = 'rgba(0,0,0,0.45)';
+      ctx.beginPath();
+      ctx.ellipse(0, 5, 35, 23, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = t.tier >= 5 ? '#1e293b' : '#57534e';
+      ctx.strokeStyle = t.tier >= 5 ? '#38bdf8' : '#1c1917';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.ellipse(0, 2, 32, 20, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Tower Structure by Type & Specialization
+      if (t.type === 'archer') {
+        ctx.fillStyle = t.spec === 'rangers' ? '#15803d' : t.spec === 'musketeers' ? '#b45309' : '#854d0e';
+        ctx.fillRect(-18, -28, 36, 28);
+        ctx.strokeRect(-18, -28, 36, 28);
+        ctx.fillStyle = t.spec === 'rangers' ? '#166534' : '#a16207';
+        ctx.beginPath();
+        ctx.moveTo(-23, -26);
+        ctx.lineTo(0, -45);
+        ctx.lineTo(23, -26);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // Rooftop Archer / Musketeer unit aiming bow/rifle
+        ctx.save();
+        ctx.translate(0, -34);
+        ctx.fillStyle = '#fde68a';
+        ctx.beginPath();
+        ctx.arc(0, -4, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.rotate(t.aimAngle || 0);
+        ctx.strokeStyle = t.spec === 'musketeers' ? '#94a3b8' : '#fef08a';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(2, 0);
+        ctx.lineTo(13 - (t.recoil || 0) * 3, 0);
+        ctx.stroke();
+        ctx.restore();
+      } else if (t.type === 'barracks') {
+        ctx.fillStyle = t.spec === 'paladins' ? '#eab308' : t.spec === 'barbarians' ? '#991b1b' : '#1d4ed8';
+        ctx.fillRect(-20, -24, 40, 24);
+        ctx.strokeRect(-20, -24, 40, 24);
+        ctx.fillStyle = t.spec === 'paladins' ? '#fef08a' : t.spec === 'barbarians' ? '#dc2626' : '#2563eb';
+        ctx.beginPath();
+        ctx.moveTo(-25, -24);
+        ctx.lineTo(0, -42);
+        ctx.lineTo(25, -24);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#1c1917';
+        ctx.fillRect(-7, -14, 14, 14);
+        // Crossed swords crest
+        ctx.strokeStyle = '#fde047';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-6, -32); ctx.lineTo(6, -24);
+        ctx.moveTo(6, -32); ctx.lineTo(-6, -24);
+        ctx.stroke();
+      } else if (t.type === 'mage') {
+        ctx.fillStyle = t.spec === 'arcane' ? '#581c87' : t.spec === 'sorcerer' ? '#9a3412' : '#4c1d95';
+        ctx.beginPath();
+        ctx.moveTo(-19, 2);
+        ctx.lineTo(-13, -34);
+        ctx.lineTo(13, -34);
+        ctx.lineTo(19, 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        const bob = Math.sin(state.time * 4 + t.padId) * 3;
+        ctx.fillStyle = t.spec === 'sorcerer' ? '#fb923c' : '#c084fc';
+        ctx.beginPath();
+        ctx.arc(0, -44 + bob, 9 + (t.recoil || 0) * 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      } else if (t.type === 'artillery') {
+        ctx.fillStyle = t.spec === 'tesla' ? '#0284c7' : '#44403c';
+        ctx.fillRect(-21, -20, 42, 20);
+        ctx.strokeRect(-21, -20, 42, 20);
+        if (t.spec === 'tesla') {
+          ctx.fillStyle = '#38bdf8';
+          ctx.beginPath();
+          ctx.arc(0, -34, 11 + Math.sin(state.time * 10) * 1.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        } else {
+          ctx.save();
+          ctx.translate(0, -22 + (t.recoil || 0) * 4);
+          ctx.fillStyle = '#1c1917';
+          ctx.beginPath();
+          ctx.arc(0, 0, t.spec === 'bertha' ? 15 : 12, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+        }
+      } else if (t.type === 'sunforge') {
+        // Golden Solar Pyramid Obelisk + Beam
+        ctx.fillStyle = '#ca8a04';
+        ctx.beginPath();
+        ctx.moveTo(-18, 2);
+        ctx.lineTo(-8, -42);
+        ctx.lineTo(8, -42);
+        ctx.lineTo(18, 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        const pulse = Math.sin(state.time * 6) * 2;
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath();
+        ctx.arc(0, -46, 10 + pulse, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      } else if (t.type === 'necro') {
+        // Gothic Necromancer Crypt
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(-19, -28, 38, 28);
+        ctx.strokeRect(-19, -28, 38, 28);
+        ctx.fillStyle = '#10b981';
+        ctx.beginPath();
+        ctx.arc(0, -38 + Math.sin(state.time * 4) * 2.5, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      // Draw Tier Stars Badge (5 stars + overcharge for Mythic)
+      const stars = t.tier >= 5 ? `🌌T5${t.overchargeLevel > 0 ? '+' + t.overchargeLevel : ''}` : '★'.repeat(t.tier);
+      ctx.fillStyle = 'rgba(0,0,0,0.82)';
+      ctx.fillRect(-22, 8, 44, 13);
+      ctx.fillStyle = t.tier >= 5 ? '#38bdf8' : t.tier === 4 ? '#4ade80' : '#fbbf24';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(stars, 0, 17);
+      ctx.restore();
+
+      // Render active Sunforge Solar Beams
+      if (t.type === 'sunforge' && t.beamTimer > 0 && t.beamTargets) {
+        for (const bt of t.beamTargets) {
+          ctx.save();
+          ctx.strokeStyle = '#fde047';
+          ctx.lineWidth = 5;
+          ctx.beginPath();
+          ctx.moveTo(t.x, t.y - 46);
+          ctx.lineTo(bt.x, bt.y - 10);
+          ctx.stroke();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      // Draw Rally Flag if this Barracks or Necro tower is selected
+      if ((t.type === 'barracks' || t.type === 'necro') && isSelected) {
+        ctx.save();
+        ctx.fillStyle = '#38bdf8';
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(t.rallyX, t.rallyY, 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.font = '14px sans-serif';
+        ctx.fillText('🚩', t.rallyX - 4, t.rallyY - 4);
+        ctx.restore();
+      }
+    }
+
+    function drawTree(tree) {
+      ctx.save();
+      ctx.translate(tree.x, tree.y);
+      const sway = Math.sin(state.time * 1.8 + tree.phase) * 1.8;
+      ctx.scale(tree.scale, tree.scale);
+
+      // Shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.32)';
+      ctx.beginPath();
+      ctx.ellipse(2, 6, 22, 11, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Trunk
+      ctx.fillStyle = '#5c4033';
+      ctx.fillRect(-5, -12, 10, 16);
+
+      // Canopy
+      if (tree.hue === 'oak') {
+        ctx.fillStyle = '#2d5a18';
+        ctx.beginPath();
+        ctx.arc(sway, -24, 21, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#3f7722';
+        ctx.beginPath();
+        ctx.arc(-7 + sway, -28, 15, 0, Math.PI * 2);
+        ctx.arc(8 + sway, -26, 14, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#52942d';
+        ctx.beginPath();
+        ctx.arc(-2 + sway, -34, 12, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.fillStyle = '#1e4620';
+        ctx.beginPath();
+        ctx.moveTo(sway, -52);
+        ctx.lineTo(-22, -12);
+        ctx.lineTo(22, -12);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = '#2b612d';
+        ctx.beginPath();
+        ctx.moveTo(sway * 1.2, -58);
+        ctx.lineTo(-17, -26);
+        ctx.lineTo(17, -26);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function drawSoldier(s) {
+      ctx.save();
+      ctx.translate(s.x, s.y);
+      const stride = Math.sin(s.walkCycle || 0) * 3;
+
+      // Ground Shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.38)';
+      ctx.beginPath();
+      ctx.ellipse(0, 4, 11, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Animated Walking Legs
+      ctx.strokeStyle = '#1c1917';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(-3, -2); ctx.lineTo(-4 + stride, 4);
+      ctx.moveTo(3, -2); ctx.lineTo(4 - stride, 4);
+      ctx.stroke();
+
+      // Armor Torso
+      ctx.fillStyle = s.isSkeleton ? '#0f766e' : s.spec === 'paladins' ? '#eab308' : s.spec === 'barbarians' ? '#dc2626' : s.isReinforcement ? '#0284c7' : '#2563eb';
+      ctx.strokeStyle = '#1c1917';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(-8, -14, 16, 13, 5);
+      ctx.fill();
+      ctx.stroke();
+
+      // Head / Helmet
+      ctx.fillStyle = s.isSkeleton ? '#e2e8f0' : '#fed7aa';
+      ctx.beginPath();
+      ctx.arc(0, -18, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Off-hand Shield
+      ctx.fillStyle = s.spec === 'paladins' ? '#fde047' : '#94a3b8';
+      ctx.fillRect(-s.facing * 9 - 2, -13, 5, 10);
+      ctx.strokeRect(-s.facing * 9 - 2, -13, 5, 10);
+
+      // Swinging Sword / Axe with Slash Arc!
+      ctx.save();
+      ctx.translate(s.facing * 7, -9);
+      const swingAngle = s.swingAnim > 0 ? Math.sin((1 - s.swingAnim) * Math.PI) * 1.9 * s.facing : -0.35 * s.facing;
+      ctx.rotate(swingAngle);
+      ctx.strokeStyle = s.spec === 'barbarians' ? '#fca5a5' : '#f8fafc';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(s.facing * 12, -11);
+      ctx.stroke();
+      if (s.swingAnim > 0.2) {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, 0, 14, -1.2, 0.5);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      drawHealthBar(0, -29, 24, 4, s.hp, s.maxHp, '#22c55e');
+      ctx.restore();
+    }
+
+    function drawHero(h) {
+      const isSelected = state.selectedEntity === h || state.targetingMode === 'hero';
+      ctx.save();
+      ctx.translate(h.x, h.y);
+      const stride = Math.sin(h.walkCycle || 0) * 4;
+
+      // Golden Hero Aura
+      ctx.strokeStyle = isSelected ? '#fde047' : 'rgba(250, 204, 21, 0.55)';
+      ctx.lineWidth = isSelected ? 3 : 2;
+      ctx.beginPath();
+      ctx.ellipse(0, 4, 19, 10, 0, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Flowing Royal Cape
+      ctx.fillStyle = '#1d4ed8';
+      ctx.strokeStyle = '#1e3a8a';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(-h.facing * 4, -16);
+      ctx.lineTo(-h.facing * (15 + Math.abs(stride)), -2);
+      ctx.lineTo(-h.facing * 4, 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Animated Boots/Legs
+      ctx.strokeStyle = '#1c1917';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(-4, -2); ctx.lineTo(-5 + stride, 5);
+      ctx.moveTo(4, -2); ctx.lineTo(5 - stride, 5);
+      ctx.stroke();
+
+      // Golden Plate Armor Torso (Flashes red briefly when hit!)
+      ctx.fillStyle = h.hitFlash > 0.2 ? '#ef4444' : '#f59e0b';
+      ctx.strokeStyle = '#1c1917';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.roundRect(-10, -17, 20, 16, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      // Royal Kite Shield
+      ctx.fillStyle = '#2563eb';
+      ctx.strokeStyle = '#fde047';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(-h.facing * 11 - 4, -14, 8, 12, 3);
+      ctx.fill();
+      ctx.stroke();
+
+      // Crowned Helmet & Plume
+      ctx.fillStyle = '#fde047';
+      ctx.strokeStyle = '#1c1917';
+      ctx.beginPath();
+      ctx.arc(0, -22, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.arc(-h.facing * 3, -30, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Animated Excalibur Sword Swing & Golden Slash Arc!
+      ctx.save();
+      ctx.translate(h.facing * 9, -11);
+      const swingAngle = h.swingAnim > 0
+        ? (-1.1 + Math.sin((1 - h.swingAnim) * Math.PI) * 2.4) * h.facing
+        : -0.25 * h.facing;
+      ctx.rotate(swingAngle);
+
+      // Sword Hilt & Shining Blade
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(-4, -3);
+      ctx.lineTo(4, -3);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#e0f2fe';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(0, -21);
+      ctx.stroke();
+
+      // Sweeping Golden Slash Trail during active swing
+      if (h.swingAnim > 0.15) {
+        ctx.strokeStyle = 'rgba(253, 224, 71, 0.85)';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(0, 0, 20, -Math.PI * 0.85, Math.PI * 0.25);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      drawHealthBar(0, -37, 32, 5, h.hp, h.maxHp, '#4ade80');
+      ctx.restore();
+    }
+
+    function drawEnemy(e) {
+      const isSelected = state.selectedEntity === e;
+      ctx.save();
+      const flyOffset = e.flying ? -28 + Math.sin(e.walkCycle * 1.4) * 5 : 0;
+      const bounce = !e.flying && !e.inMeleeContact ? Math.abs(Math.sin(e.walkCycle)) * 3 : 0;
+      const stride = !e.flying && !e.inMeleeContact ? Math.sin(e.walkCycle) * 3.5 : 0;
+
+      // Ground Shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.38)';
+      ctx.beginPath();
+      ctx.ellipse(e.x, e.y + 5, e.radius, e.radius * 0.52, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.translate(e.x, e.y + flyOffset - bounce);
+
+      if (isSelected) {
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(0, -6, e.radius + 6, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      const colors = {
+        goblin: '#65a30d',
+        orc: '#15803d',
+        worg: '#92400e',
+        troll: '#0f766e',
+        darkknight: '#334155',
+        shaman: '#7e22ce',
+        gargoyle: '#be123c',
+        boss: '#7f1d1d'
+      };
+
+      // Walking Feet for Ground Enemies
+      if (!e.flying) {
+        ctx.strokeStyle = '#1c1917';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(-4, 0); ctx.lineTo(-5 + stride, 5);
+        ctx.moveTo(4, 0); ctx.lineTo(5 - stride, 5);
+        ctx.stroke();
+      }
+
+      // Wings for Flying Gargoyle
+      if (e.flying) {
+        const wingFlap = Math.sin(e.walkCycle * 2) * 8;
+        ctx.fillStyle = '#881337';
+        ctx.beginPath();
+        ctx.moveTo(0, -8);
+        ctx.lineTo(-22, -18 + wingFlap);
+        ctx.lineTo(-12, -2);
+        ctx.moveTo(0, -8);
+        ctx.lineTo(22, -18 + wingFlap);
+        ctx.lineTo(12, -2);
+        ctx.fill();
+      }
+
+      // Body Circle
+      ctx.fillStyle = colors[e.type] || '#dc2626';
+      ctx.strokeStyle = '#1c1917';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.arc(0, -e.radius * 0.6, e.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      if (e.poisonTimer > 0) {
+        ctx.strokeStyle = '#4ade80';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+      if (e.curseTimer > 0) {
+        ctx.strokeStyle = '#c084fc';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      // Emoji / Icon Identifier
+      ctx.font = `${Math.round(e.radius * 1.15)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(e.icon, 0, -e.radius * 0.6);
+
+      // Swinging Enemy Weapon (Cleaver, Club, Dark Greatsword, or Shaman Staff)
+      if (!e.flying) {
+        ctx.save();
+        ctx.translate(e.facing * (e.radius * 0.75), -e.radius * 0.5);
+        const swing = e.swingAnim > 0 ? Math.sin((1 - e.swingAnim) * Math.PI) * 1.9 * e.facing : -0.3 * e.facing;
+        ctx.rotate(swing);
+        ctx.strokeStyle = e.type === 'troll' ? '#78350f' : e.type === 'shaman' ? '#c084fc' : '#cbd5e1';
+        ctx.lineWidth = e.boss ? 5 : 3;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(e.facing * (e.radius * 0.9), -e.radius * 0.85);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      const barY = -e.radius * 1.85 - 4;
+      drawHealthBar(0, barY, e.boss ? 48 : 26, e.boss ? 6 : 4, e.hp, e.maxHp, '#ef4444');
+      ctx.restore();
+    }
+
+    function drawHealthBar(x, y, w, h, hp, maxHp, color) {
+      const pct = Math.max(0, Math.min(1, hp / maxHp));
+      ctx.fillStyle = 'rgba(0,0,0,0.75)';
+      ctx.fillRect(x - w / 2 - 1, y - 1, w + 2, h + 2);
+      ctx.fillStyle = color;
+      ctx.fillRect(x - w / 2, y, w * pct, h);
+    }
+
+    function drawProjectiles() {
+      for (const p of state.projectiles) {
+        if (p.delay && p.delay > 0) continue;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        if (p.type === 'arrow') {
+          ctx.rotate(p.angle || 0);
+          ctx.strokeStyle = p.poison ? '#4ade80' : '#fef08a';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(-8, 0);
+          ctx.lineTo(8, 0);
+          ctx.stroke();
+        } else if (p.type === 'bullet') {
+          ctx.fillStyle = '#fde047';
+          ctx.beginPath();
+          ctx.arc(0, 0, 4, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (p.type === 'bolt') {
+          ctx.fillStyle = p.curse ? '#fb923c' : '#c084fc';
+          ctx.beginPath();
+          ctx.arc(0, 0, 6, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (p.type === 'shell') {
+          ctx.fillStyle = '#1c1917';
+          ctx.strokeStyle = '#f97316';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(0, 0, 7, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        } else if (p.type === 'meteor') {
+          ctx.fillStyle = '#ef4444';
+          ctx.beginPath();
+          ctx.arc(0, 0, 12, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#fde047';
+          ctx.beginPath();
+          ctx.arc(-3, -3, 6, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (p.type === 'axe') {
+          ctx.rotate(state.time * 18);
+          ctx.fillStyle = '#e5e7eb';
+          ctx.fillRect(-6, -2, 12, 4);
+        }
+        ctx.restore();
+      }
+    }
+
+    // =========================================================================
+    // 13. VISUAL EFFECTS HELPERS
+    // =========================================================================
+    function spawnBurstParticles(x, y, color, count = 10) {
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 25 + Math.random() * 85;
+        const life = 0.25 + Math.random() * 0.35;
+        state.particles.push({
+          x,
+          y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          r: 2.5 + Math.random() * 2.5,
+          color,
+          life,
+          maxLife: life
+        });
+      }
+    }
+
+    function spawnBeamParticles(x1, y1, x2, y2, color) {
+      const steps = 12;
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        state.particles.push({
+          x: x1 + (x2 - x1) * t + (Math.random() - 0.5) * 6,
+          y: y1 + (y2 - y1) * t + (Math.random() - 0.5) * 6,
+          vx: 0,
+          vy: 0,
+          r: 3.5,
+          color,
+          life: 0.22,
+          maxLife: 0.22
+        });
+      }
+    }
+
+    function addFloatingText(x, y, text, color = '#fff', size = 14) {
+      state.floatingTexts.push({ x, y, text, color, size, life: 1.1 });
+    }
+
+    function addComicPopup(x, y, text, fg = '#fef08a', bg = '#dc2626') {
+      state.comicPopups.push({
+        x,
+        y,
+        text,
+        fg,
+        bg,
+        scale: 0.35,
+        angle: (Math.random() - 0.5) * 0.28,
+        life: 0.78
+      });
+    }
+
+    function randInt(min, max) {
+      return Math.floor(min + Math.random() * (max - min + 1));
+    }
+
+    // =========================================================================
+    // 14. HUD & INSPECTOR UPDATES
+    // =========================================================================
+    function updateTopHUD() {
+      document.getElementById('hud-lives').textContent = state.lives;
+      document.getElementById('hud-gold').textContent = state.gold;
+      const dispWave = Math.max(0, state.waveIndex + 1);
+      document.getElementById('hud-wave').textContent = state.endlessMode ? `${dispWave} (∞)` : `${dispWave} / ${state.maxWaves}`;
+
+      const callBtn = document.getElementById('btn-call-wave');
+      const callText = document.getElementById('btn-call-wave-text');
+      if (state.waveIndex === -1) {
+        callBtn.disabled = false;
+        callText.textContent = 'Start Wave 1';
+      } else if (state.waveIndex + 1 < state.maxWaves || state.endlessMode) {
+        callBtn.disabled = false;
+        callText.textContent = `Call Wave ${state.waveIndex + 2}`;
+      } else {
+        callBtn.disabled = true;
+        callText.textContent = 'Final Wave';
+      }
+    }
+
+    function updateSkullMarkerUI() {
+      const skullContainer = document.getElementById('skull-call-container');
+      const northContainer = document.getElementById('skull-north-container');
+      const ring = document.getElementById('skull-timer-ring');
+      const northRing = document.getElementById('skull-north-ring');
+      const nextIdx = state.waveIndex + 1;
+
+      if (state.gameOver || (nextIdx >= state.maxWaves && !state.endlessMode)) {
+        skullContainer.classList.add('hidden');
+        northContainer.classList.add('hidden');
+        return;
+      }
+
+      // Show skull marker before Wave 1 or whenever countdown is active or player can call next wave early
+      skullContainer.classList.remove('hidden');
+
+      const wData = WAVES[nextIdx];
+      const hasNorthPath = !wData || wData.groups.some(g => g.path === 1);
+      if (hasNorthPath) {
+        northContainer.classList.remove('hidden');
+      } else {
+        northContainer.classList.add('hidden');
+      }
+
+      let dashOffset = '0';
+      if (state.waveIndex >= 0 && state.nextWaveCountdown > 0) {
+        const pct = state.nextWaveCountdown / state.nextWaveMaxTimer;
+        dashOffset = String(132 * (1 - pct));
+      }
+      ring.style.strokeDashoffset = dashOffset;
+      northRing.style.strokeDashoffset = dashOffset;
+
+      // Populate Wave Preview Tooltip
+      document.getElementById('skull-tooltip-title').textContent = wData ? wData.title : `Endless Wave ${nextIdx + 1}`;
+      const listEl = document.getElementById('skull-tooltip-enemies');
+      if (wData) {
+        listEl.innerHTML = wData.groups.map(g => {
+          const ed = ENEMY_DEFS[g.type];
+          return `<div>${ed.icon} <b>${g.count}x ${ed.name}</b> ${ed.flying ? '<span class="text-rose-400">(Flying)</span>' : g.path === 1 ? '<span class="text-amber-300">(North)</span>' : ''}</div>`;
+        }).join('');
+      } else {
+        listEl.innerHTML = '<div>💀 Scaling Endless Hordes!</div>';
+      }
+    }
+
+    function updateSpellHUD() {
+      const fireCdEl = document.getElementById('spell-fire-cd');
+      const reinfCdEl = document.getElementById('spell-reinf-cd');
+
+      if (state.spells.fire.cd > 0) {
+        fireCdEl.classList.remove('hidden');
+        fireCdEl.textContent = Math.ceil(state.spells.fire.cd) + 's';
+      } else {
+        fireCdEl.classList.add('hidden');
+      }
+
+      if (state.spells.reinf.cd > 0) {
+        reinfCdEl.classList.remove('hidden');
+        reinfCdEl.textContent = Math.ceil(state.spells.reinf.cd) + 's';
+      } else {
+        reinfCdEl.classList.add('hidden');
+      }
+    }
+
+    function updateHeroHUD() {
+      const h = state.hero;
+      document.getElementById('hero-lvl-badge').textContent = `Lv${h.level}`;
+      document.getElementById('hero-hp-bar').style.width = `${(h.hp / h.maxHp) * 100}%`;
+      document.getElementById('hero-xp-bar').style.width = `${(h.xp / h.xpNext) * 100}%`;
+      document.getElementById('hero-hp-text').textContent = `${Math.ceil(h.hp)}/${h.maxHp}`;
+
+      const deadOverlay = document.getElementById('hero-dead-overlay');
+      const stateLabel = document.getElementById('hero-state-label');
+      if (h.dead) {
+        deadOverlay.classList.remove('hidden');
+        deadOverlay.textContent = Math.ceil(h.respawnTimer) + 's';
+        stateLabel.textContent = 'Respawning';
+        stateLabel.className = 'text-[10px] font-bold text-red-400';
+      } else {
+        deadOverlay.classList.add('hidden');
+        stateLabel.textContent = h.engagedEnemies.length > 0 ? 'Fighting' : 'Ready';
+        stateLabel.className = 'text-[10px] font-bold text-emerald-400';
+      }
+    }
+
+    function formatArmorLabel(val) {
+      if (!val || val <= 0) return 'None';
+      if (val <= 0.3) return `Low (${Math.round(val * 100)}%)`;
+      if (val <= 0.55) return `Med (${Math.round(val * 100)}%)`;
+      return `High (${Math.round(val * 100)}%)`;
+    }
+
+    function updateInspector() {
+      const iconEl = document.getElementById('insp-icon');
+      const titleEl = document.getElementById('insp-title');
+      const subEl = document.getElementById('insp-subtitle');
+      const descEl = document.getElementById('insp-desc');
+      const statsEl = document.getElementById('insp-stats');
+      const actionsEl = document.getElementById('insp-actions');
+      actionsEl.innerHTML = '';
+      actionsEl.classList.add('hidden');
+
+      const ent = state.selectedEntity;
+      if (!ent) {
+        iconEl.textContent = '🏰';
+        titleEl.textContent = 'Royal Battlefield';
+        subEl.textContent = 'Tactical Overview';
+        descEl.textContent = 'Click any Tower Pad to build, or click any Tower, Hero, or Enemy to inspect live stats.';
+        statsEl.innerHTML = `<span>🏹 4 Tower Classes</span><span>👑 Hero Command</span><span>💀 Early Wave Bonus</span>`;
+        return;
+      }
+
+      if (ent.id === 'hero') {
+        iconEl.textContent = '👑';
+        titleEl.textContent = `${ent.name} (Lv ${ent.level})`;
+        subEl.textContent = 'Royal Champion';
+        descEl.textContent = 'Blocks up to 2 enemies, heals out of combat, and unleashes Holy Judgment AoE strikes.';
+        statsEl.innerHTML = `
+          <span>❤️ ${Math.ceil(ent.hp)}/${ent.maxHp}</span>
+          <span>⚔️ ${ent.dmgMin}-${ent.dmgMax}</span>
+          <span>🛡️ Armor: ${formatArmorLabel(ent.armor)}</span>
+        `;
+      } else if (ent.padId !== undefined) {
+        // Tower
+        iconEl.textContent = ent.icon;
+        titleEl.textContent = ent.name;
+        subEl.textContent = `Tier ${ent.tier} Tower`;
+        descEl.textContent = ent.desc;
+        if (ent.type === 'barracks') {
+          statsEl.innerHTML = `<span>🛡️ 3 Soldiers</span><span>🚩 Rally Range: ${ent.range}</span><span>🪙 Value: ${ent.investedGold}g</span>`;
+        } else {
+          statsEl.innerHTML = `<span>⚔️ Dmg: ${ent.dmgMin}-${ent.dmgMax}</span><span>🎯 Range: ${ent.range}</span><span>⏱️ Rate: ${ent.rate}s</span>`;
+        }
+      } else if (ent.waypointIndex !== undefined) {
+        // Enemy
+        iconEl.textContent = ent.icon;
+        titleEl.textContent = ent.name;
+        subEl.textContent = ent.flying ? 'Flying Enemy' : ent.boss ? 'Boss Warlord' : 'Ground Enemy';
+        descEl.textContent = ent.desc;
+        statsEl.innerHTML = `
+          <span>❤️ ${Math.ceil(ent.hp)}/${ent.maxHp}</span>
+          <span>🛡️ Phys: ${formatArmorLabel(ent.armor)}</span>
+          <span>✨ Mag: ${formatArmorLabel(ent.magicRes)}</span>
+        `;
+      }
+    }
+
+    function updateInspectorLiveValues() {
+      const ent = state.selectedEntity;
+      if (!ent) return;
+      if (ent.id === 'hero' || ent.waypointIndex !== undefined) {
+        updateInspector();
+      }
+    }
+
+    function triggerGameOver(victory) {
+      state.gameOver = true;
+      closeRadialMenu();
+      cancelTargetingMode();
+
+      const modal = document.getElementById('gameover-modal');
+      const badge = document.getElementById('go-badge');
+      const title = document.getElementById('go-title');
+      const sub = document.getElementById('go-subtitle');
+      const starsEl = document.getElementById('go-stars');
+      const endlessBtn = document.getElementById('go-endless-btn');
+      const nextStageBtn = document.getElementById('go-next-stage-btn');
+
+      modal.classList.remove('hidden');
+      document.getElementById('go-lives').textContent = `${state.lives} / 20`;
+      document.getElementById('go-kills').textContent = state.kills;
+      document.getElementById('go-hero-lvl').textContent = `Lv ${state.hero.level}`;
+
+      if (victory) {
+        sfx.play('hero');
+        badge.textContent = '🏆';
+        title.textContent = 'ROYAL VICTORY!';
+        title.className = 'font-fantasy text-2xl sm:text-3xl font-black text-amber-300 tracking-wider';
+        sub.textContent = `${CAMPAIGN_STAGES[state.stageIndex].name} Cleared!`;
+        const stars = state.lives >= 18 ? 3 : state.lives >= 10 ? 2 : 1;
+
+        // Award new Campaign Stars & Unlock Next Stage
+        const prevBest = state.stageStars[state.stageIndex] || 0;
+        if (stars > prevBest) {
+          state.starsTotal += (stars - prevBest);
+          state.stageStars[state.stageIndex] = stars;
+        }
+        if (state.stageIndex + 1 < CAMPAIGN_STAGES.length) {
+          state.unlockedStage = Math.max(state.unlockedStage, state.stageIndex + 1);
+          nextStageBtn.classList.remove('hidden');
+        } else {
+          nextStageBtn.classList.add('hidden');
+        }
+        updateStarsHUD();
+
+        starsEl.innerHTML = Array.from({ length: 3 }, (_, i) =>
+          `<span class="${i < stars ? 'opacity-100 scale-110' : 'opacity-25 grayscale'}">⭐</span>`
+        ).join('');
+        endlessBtn.classList.remove('hidden');
+      } else {
+        sfx.play('boom');
+        badge.textContent = '💀';
+        title.textContent = 'DEFEAT!';
+        title.className = 'font-fantasy text-2xl sm:text-3xl font-black text-red-500 tracking-wider';
+        sub.textContent = 'The dark horde breached the Royal Castle Gate!';
+        starsEl.innerHTML = '<span class="opacity-25 grayscale">⭐</span><span class="opacity-25 grayscale">⭐</span><span class="opacity-25 grayscale">⭐</span>';
+        endlessBtn.classList.add('hidden');
+        nextStageBtn.classList.add('hidden');
+      }
+    }
+
+    function updateStarsHUD() {
+      const avail = Math.max(0, state.starsTotal - state.starsSpent);
+      document.getElementById('hud-stars-count').textContent = avail;
+      const availModal = document.getElementById('tech-stars-avail');
+      if (availModal) availModal.textContent = avail;
+    }
+
+    function renderLevelsModal() {
+      const grid = document.getElementById('levels-grid');
+      grid.innerHTML = '';
+      CAMPAIGN_STAGES.forEach((st, idx) => {
+        const unlocked = idx <= state.unlockedStage;
+        const earned = state.stageStars[idx] || 0;
+        const isCurrent = idx === state.stageIndex;
+        const card = document.createElement('div');
+        card.className = `p-4 rounded-xl border-2 flex flex-col justify-between ${isCurrent ? 'bg-amber-950/80 border-amber-400' : unlocked ? 'bg-stone-900/80 border-amber-700/60' : 'bg-stone-950/60 border-stone-800 opacity-65'}`;
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="font-fantasy font-black text-base text-amber-300">${st.name}</span>
+              <span class="text-sm">${'⭐'.repeat(earned)}${'☆'.repeat(3 - earned)}</span>
+            </div>
+            <div class="text-xs font-bold text-emerald-400 mt-0.5">${st.subtitle} • Start Gold: ${st.startGold}g</div>
+            <p class="text-xs text-amber-100/80 mt-1.5">${st.desc}</p>
+          </div>
+          <div class="mt-3 flex items-center justify-between">
+            <span class="text-[11px] font-bold text-amber-200/70">${st.pads.length} Build Pads • 12 Waves</span>
+            <button class="kr-btn px-3 py-1 rounded-lg font-black text-xs" ${!unlocked ? 'disabled' : ''}>
+              ${isCurrent ? '🔄 Restart Stage' : unlocked ? '⚔️ Play Stage' : '🔒 Locked'}
+            </button>
+          </div>
+        `;
+        const btn = card.querySelector('button');
+        if (unlocked) {
+          btn.addEventListener('click', () => {
+            state.stageIndex = idx;
+            document.getElementById('levels-modal').classList.add('hidden');
+            initGame();
+          });
+        }
+        grid.appendChild(card);
+      });
+    }
+
+    function renderTechModal() {
+      updateStarsHUD();
+      const grid = document.getElementById('tech-grid');
+      grid.innerHTML = '';
+      const avail = Math.max(0, state.starsTotal - state.starsSpent);
+
+      TECH_TREE_DEFS.forEach(item => {
+        const owned = !!state.tech[item.id];
+        const canBuy = !owned && avail >= item.cost;
+        const card = document.createElement('div');
+        card.className = `p-3.5 rounded-xl border-2 flex flex-col justify-between ${owned ? 'bg-emerald-950/50 border-emerald-400' : 'bg-stone-900/80 border-amber-800/60'}`;
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-2xl">${item.icon}</span>
+              <span class="px-2 py-0.5 rounded text-[11px] font-black ${owned ? 'bg-emerald-700 text-white' : 'bg-amber-900 text-yellow-300'}">${owned ? '✓ ACTIVE' : item.cost + ' ⭐'}</span>
+            </div>
+            <div class="font-extrabold text-amber-300 text-sm mt-1.5">${item.name}</div>
+            <p class="text-[11px] text-amber-100/85 mt-1 leading-snug">${item.desc}</p>
+          </div>
+          <button class="mt-3 w-full py-1.5 rounded-lg font-black text-xs ${owned ? 'kr-btn-stone' : 'kr-btn'}" ${!owned && !canBuy ? 'disabled' : ''}>
+            ${owned ? 'Unlocked' : `Unlock (${item.cost} ⭐)`}
+          </button>
+        `;
+        const btn = card.querySelector('button');
+        btn.addEventListener('click', () => {
+          if (!owned && avail >= item.cost) {
+            state.tech[item.id] = true;
+            state.starsSpent += item.cost;
+            sfx.play('build');
+            renderTechModal();
+          }
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    // =========================================================================
+    // 15. INPUT HANDLING (CANVAS CLICKS, HOVER, KEYBOARD SHORTCUTS)
+    // =========================================================================
+    function getLogicalCoords(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: ((clientX - rect.left) / rect.width) * LOGICAL_WIDTH,
+        y: ((clientY - rect.top) / rect.height) * LOGICAL_HEIGHT
+      };
+    }
+
+    canvas.addEventListener('mousemove', (e) => {
+      state.mousePos = getLogicalCoords(e);
+    });
+
+    canvas.addEventListener('click', (e) => {
+      const pos = getLogicalCoords(e);
+      state.mousePos = pos;
+
+      // 1. If in active Targeting Mode (Spell, Hero Move, or Barracks Rally)
+      if (state.targetingMode === 'fire') {
+        castRainOfFire(pos.x, pos.y);
+        return;
+      }
+      if (state.targetingMode === 'reinf') {
+        castReinforcements(pos.x, pos.y);
+        return;
+      }
+      if (state.targetingMode === 'hero') {
+        commandHeroMove(pos.x, pos.y);
+        return;
+      }
+      if (state.targetingMode === 'rally' && state.rallyTower) {
+        setBarracksRallyPoint(state.rallyTower, pos.x, pos.y);
+        return;
+      }
+
+      // 2. Check if player clicked on Hero Sir Gerald
+      if (!state.hero.dead && Math.hypot(pos.x - state.hero.x, pos.y - (state.hero.y - 10)) <= 24) {
+        enterTargetingMode('hero');
+        return;
+      }
+
+      // 3. Check if player clicked on a Tower Pad or Built Tower
+      for (const pad of TOWER_PADS) {
+        if (Math.hypot(pos.x - pad.x, pos.y - pad.y) <= 34) {
+          const builtTower = state.towers.find(t => t.padId === pad.id);
+          if (builtTower) {
+            openRadialMenuForTower(builtTower);
+          } else {
+            openRadialMenuForPad(pad);
+          }
+          return;
+        }
+      }
+
+      // 4. Check if player clicked on an Enemy to inspect
+      for (const enemy of state.enemies) {
+        const ey = enemy.flying ? enemy.y - 28 : enemy.y;
+        if (Math.hypot(pos.x - enemy.x, pos.y - ey) <= enemy.radius + 10) {
+          closeRadialMenu();
+          state.selectedEntity = enemy;
+          updateInspector();
+          return;
+        }
+      }
+
+      // 5. If Hero is already selected, clicking the ground moves him!
+      if (state.selectedEntity === state.hero && !state.hero.dead) {
+        commandHeroMove(pos.x, pos.y);
+        return;
+      }
+
+      // Otherwise deselect and close radial menu
+      closeRadialMenu();
+      state.selectedEntity = null;
+      updateInspector();
+    });
+
+    // UI Button Listeners
+    document.getElementById('btn-call-wave').addEventListener('click', () => callNextWave(true));
+    document.getElementById('skull-marker-btn').addEventListener('click', () => callNextWave(true));
+    document.getElementById('skull-north-btn').addEventListener('click', () => callNextWave(true));
+
+    document.getElementById('btn-speed').addEventListener('click', (e) => {
+      state.gameSpeed = state.gameSpeed === 1 ? 2 : 1;
+      e.currentTarget.textContent = `${state.gameSpeed}x`;
+    });
+
+    document.getElementById('btn-pause').addEventListener('click', (e) => {
+      state.paused = !state.paused;
+      e.currentTarget.textContent = state.paused ? '▶️' : '⏸️';
+    });
+
+    document.getElementById('btn-mute').addEventListener('click', (e) => {
+      sfx.muted = !sfx.muted;
+      e.currentTarget.textContent = sfx.muted ? '🔇' : '🔊';
+    });
+
+    document.getElementById('btn-guide').addEventListener('click', () => {
+      state.paused = true;
+      document.getElementById('btn-pause').textContent = '▶️';
+      document.getElementById('guide-modal').classList.remove('hidden');
+    });
+
+    document.getElementById('close-guide-btn').addEventListener('click', () => {
+      document.getElementById('guide-modal').classList.add('hidden');
+      state.paused = false;
+      document.getElementById('btn-pause').textContent = '⏸️';
+    });
+
+    document.getElementById('spell-fire-btn').addEventListener('click', () => {
+      if (state.spells.fire.cd <= 0) enterTargetingMode('fire');
+    });
+
+    document.getElementById('spell-reinf-btn').addEventListener('click', () => {
+      if (state.spells.reinf.cd <= 0) enterTargetingMode('reinf');
+    });
+
+    document.getElementById('hero-card').addEventListener('click', () => {
+      if (!state.hero.dead) enterTargetingMode('hero');
+    });
+
+    document.getElementById('cancel-target-btn').addEventListener('click', cancelTargetingMode);
+
+    document.getElementById('btn-levels').addEventListener('click', () => {
+      state.paused = true;
+      document.getElementById('btn-pause').textContent = '▶️';
+      renderLevelsModal();
+      document.getElementById('levels-modal').classList.remove('hidden');
+    });
+
+    document.getElementById('close-levels-btn').addEventListener('click', () => {
+      document.getElementById('levels-modal').classList.add('hidden');
+      state.paused = false;
+      document.getElementById('btn-pause').textContent = '⏸️';
+    });
+
+    document.getElementById('unlock-all-btn').addEventListener('click', () => {
+      state.unlockedStage = CAMPAIGN_STAGES.length - 1;
+      state.starsTotal += 20;
+      Object.keys(state.tech).forEach(k => state.tech[k] = true);
+      sfx.play('hero');
+      updateStarsHUD();
+      renderLevelsModal();
+    });
+
+    document.getElementById('btn-tech').addEventListener('click', () => {
+      state.paused = true;
+      document.getElementById('btn-pause').textContent = '▶️';
+      renderTechModal();
+      document.getElementById('tech-modal').classList.remove('hidden');
+    });
+
+    document.getElementById('close-tech-btn').addEventListener('click', () => {
+      document.getElementById('tech-modal').classList.add('hidden');
+      state.paused = false;
+      document.getElementById('btn-pause').textContent = '⏸️';
+    });
+
+    document.getElementById('reset-tech-btn').addEventListener('click', () => {
+      Object.keys(state.tech).forEach(k => state.tech[k] = false);
+      state.starsSpent = 0;
+      renderTechModal();
+    });
+
+    document.getElementById('go-restart-btn').addEventListener('click', initGame);
+    document.getElementById('go-next-stage-btn').addEventListener('click', () => {
+      if (state.stageIndex + 1 < CAMPAIGN_STAGES.length) {
+        state.stageIndex++;
+        initGame();
+      }
+    });
+    document.getElementById('go-endless-btn').addEventListener('click', () => {
+      state.gameOver = false;
+      state.endlessMode = true;
+      document.getElementById('gameover-modal').classList.add('hidden');
+      callNextWave(false);
+    });
+
+    // Keyboard Hotkeys
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'q' || e.key === 'Q') {
+        if (state.spells.fire.cd <= 0) enterTargetingMode('fire');
+      } else if (e.key === 'w' || e.key === 'W') {
+        if (state.spells.reinf.cd <= 0) enterTargetingMode('reinf');
+      } else if (e.code === 'Space' || e.key === '1') {
+        e.preventDefault();
+        if (!state.hero.dead) enterTargetingMode('hero');
+      } else if (e.key === 'n' || e.key === 'N') {
+        callNextWave(true);
+      } else if (e.key === 'p' || e.key === 'P') {
+        document.getElementById('btn-pause').click();
+      } else if (e.key === 'Escape') {
+        cancelTargetingMode();
+        closeRadialMenu();
+      }
+    });
+
+    // =========================================================================
+    // 16. BOOTSTRAP & ANIMATION LOOP
+    // =========================================================================
+    window.onload = function () {
+      generateStaticMap();
+      initGame();
+
+      let lastTime = performance.now();
+      function gameLoop(now) {
+        const dt = Math.min(0.1, (now - lastTime) / 1000);
+        lastTime = now;
+
+        updateGame(dt);
+        renderGame();
+        requestAnimationFrame(gameLoop);
+      }
+      requestAnimationFrame(gameLoop);
+    };
+  </script>
+</body>
+</html>

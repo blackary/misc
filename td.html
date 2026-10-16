@@ -133,6 +133,26 @@
       background: #b4833e;
       border-radius: 4px;
     }
+
+    /* Full-Screen Mode Scaling */
+    #game-wrapper:fullscreen,
+    #game-wrapper:-webkit-full-screen,
+    body.fullscreen-active #game-wrapper {
+      padding: 0 !important;
+      width: 100vw;
+      height: 100vh;
+      background: #070a06;
+    }
+    #game-wrapper:fullscreen #stage-container,
+    #game-wrapper:-webkit-full-screen #stage-container,
+    body.fullscreen-active #stage-container {
+      max-width: none !important;
+      max-height: none !important;
+      width: min(100vw, calc(100vh * 16 / 9)) !important;
+      height: min(100vh, calc(100vw * 9 / 16)) !important;
+      border-radius: 0 !important;
+      border-width: 0 !important;
+    }
   </style>
 </head>
 <body>
@@ -190,6 +210,7 @@
           <button id="btn-pause" class="kr-btn-stone px-2.5 py-1.5 rounded-xl font-black text-xs sm:text-sm" title="Pause Game (P)">⏸️</button>
           <button id="btn-guide" class="kr-btn-stone px-2.5 py-1.5 rounded-xl font-black text-xs sm:text-sm" title="Encyclopedia & Tower Guide">📖</button>
           <button id="btn-mute" class="kr-btn-stone px-2.5 py-1.5 rounded-xl font-black text-xs sm:text-sm" title="Toggle Sound Effects">🔊</button>
+          <button id="btn-fullscreen" class="kr-btn-stone px-2.5 py-1.5 rounded-xl font-black text-xs sm:text-sm" title="Toggle Full-Screen Mode (F)">⛶</button>
         </div>
       </div>
 
@@ -4446,6 +4467,61 @@
       e.currentTarget.textContent = sfx.muted ? '🔇' : '🔊';
     });
 
+    function toggleFullscreen() {
+      const wrapper = document.getElementById('game-wrapper');
+      const isNativeFs = document.fullscreenElement || document.webkitFullscreenElement;
+
+      if (!isNativeFs && !document.body.classList.contains('fullscreen-active')) {
+        document.body.classList.add('fullscreen-active');
+        const reqFs = wrapper.requestFullscreen || wrapper.webkitRequestFullscreen || document.documentElement.requestFullscreen;
+        if (reqFs) {
+          try {
+            const promise = reqFs.call(wrapper);
+            if (promise && promise.catch) {
+              promise.catch(() => {
+                // Fallback maximized mode remains active if iframe restricts native fullscreen
+              });
+            }
+          } catch (err) {
+            // Ignore native fullscreen restriction errors
+          }
+        }
+      } else {
+        document.body.classList.remove('fullscreen-active');
+        const exitFs = document.exitFullscreen || document.webkitExitFullscreen;
+        if (exitFs && isNativeFs) {
+          try {
+            exitFs.call(document);
+          } catch (err) {
+            // Ignore exit errors
+          }
+        }
+      }
+      updateFullscreenButtonUI();
+    }
+
+    function updateFullscreenButtonUI() {
+      const btn = document.getElementById('btn-fullscreen');
+      if (!btn) return;
+      const isFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement || document.body.classList.contains('fullscreen-active'));
+      btn.textContent = isFs ? '🗗' : '⛶';
+      btn.title = isFs ? 'Exit Full-Screen Mode (F / Esc)' : 'Toggle Full-Screen Mode (F)';
+    }
+
+    document.getElementById('btn-fullscreen').addEventListener('click', toggleFullscreen);
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) {
+        document.body.classList.remove('fullscreen-active');
+      }
+      updateFullscreenButtonUI();
+    });
+    document.addEventListener('webkitfullscreenchange', () => {
+      if (!document.webkitFullscreenElement) {
+        document.body.classList.remove('fullscreen-active');
+      }
+      updateFullscreenButtonUI();
+    });
+
     document.getElementById('btn-guide').addEventListener('click', () => {
       state.paused = true;
       document.getElementById('btn-pause').textContent = '▶️';
@@ -4540,6 +4616,8 @@
         callNextWave(true);
       } else if (e.key === 'p' || e.key === 'P') {
         document.getElementById('btn-pause').click();
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
       } else if (e.key === 'Escape') {
         cancelTargetingMode();
         closeRadialMenu();
